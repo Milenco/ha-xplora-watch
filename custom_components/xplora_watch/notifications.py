@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from .const import EVENT_CALL, EVENT_LOW_POWER, EVENT_POWER, EVENT_SOS
+from .const import EVENT_CALL, EVENT_LOW_POWER, EVENT_POWER, EVENT_SAFEZONE, EVENT_SOS
 from .pyxplora_api.model import Data, SimpleChat
 from .pyxplora_api.status import ChatType
 
@@ -23,14 +23,16 @@ from .pyxplora_api.status import ChatType
 _MISSED_CALL_MODE_DETAIL = 50
 _MISSED_CALL_MODE = 2
 
-# ChatType value -> (ResolvedOptions option field, HA event type). POWER_ON/POWER_OFF share one
-# event, distinguished by the payload `state` (ADR 0014).
+# ChatType value -> (ResolvedOptions option field, HA event type). POWER_ON/POWER_OFF and
+# ARRIVE/LEAVE_SAFE_ZONE each share one event, distinguished by the payload `state` (ADR 0014).
 _CATEGORIES: dict[str, tuple[str, str]] = {
     ChatType.CALL_LOG.value: ("notify_call", EVENT_CALL),
     ChatType.SOS.value: ("notify_sos", EVENT_SOS),
     ChatType.POWER_ON.value: ("notify_power", EVENT_POWER),
     ChatType.POWER_OFF.value: ("notify_power", EVENT_POWER),
     ChatType.LOW_POWER.value: ("notify_low_power", EVENT_LOW_POWER),
+    ChatType.ARRIVE_SAFE_ZONE.value: ("notify_safezone", EVENT_SAFEZONE),
+    ChatType.LEAVE_SAFE_ZONE.value: ("notify_safezone", EVENT_SAFEZONE),
 }
 
 
@@ -106,6 +108,20 @@ def _build_payload(entry: SimpleChat) -> dict[str, Any]:
         )
     elif entry_type == ChatType.LOW_POWER.value:
         payload.update(battery=data.battery)
+    elif entry_type in (ChatType.ARRIVE_SAFE_ZONE.value, ChatType.LEAVE_SAFE_ZONE.value):
+        # Only the `Data` fields the model already parses. Which key carries the safezone's name is
+        # not confirmed from a real feed entry yet (`poi`/`address`/`text` are the candidates);
+        # `notifications_a` debug-logs the raw `data` of these entries so it can be pinned down.
+        payload.update(
+            state="arrive" if entry_type == ChatType.ARRIVE_SAFE_ZONE.value else "leave",
+            lat=data.lat,
+            lng=data.lng,
+            radius=data.radius,
+            address=data.address,
+            poi=data.poi,
+            text=data.text or data.Text,
+            battery=data.battery,
+        )
     return payload
 
 

@@ -74,7 +74,7 @@ BUTTON_TYPES: tuple[ButtonEntityDescription, ...] = (
         entity_category=EntityCategory.CONFIG,
         entity_registry_enabled_default=False,
     ),
-    # On-demand, account-wide fetch of the notification feed (calls, SOS, power, low battery) -- the
+    # On-demand, account-wide fetch of the notification feed (calls, SOS, power, low battery, safe zones) -- the
     # same effect as the `refresh_notifications` service. Not Guardian-gated: the feed is the
     # account's own, not a per-watch control action.
     ButtonEntityDescription(

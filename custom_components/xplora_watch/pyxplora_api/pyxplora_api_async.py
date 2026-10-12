@@ -595,7 +595,7 @@ class PyXploraApi(PyXplora):
             return -1
 
     async def getNotifications(self, uid: str = "", offset: int = 0, limit: int = 20) -> list[SimpleChat]:
-        """Fetch one page of the account notification feed (calls, SOS, power, low battery).
+        """Fetch one page of the account notification feed (calls, SOS, power, low battery, safe zones).
 
         Read-only and account-wide (`uid=""` covers all watches). A single page, no auto-paging: the
         caller derives "new" from a client-side high-water mark and never marks the feed read

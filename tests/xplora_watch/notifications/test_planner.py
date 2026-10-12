@@ -1,7 +1,7 @@
 """Pure planner tests for the notification feed (ADR 0014/0015/0016).
 
 Covers baseline-silent bootstrap, high-water dedupe, per-category enable gating, per-watch routing
-via sender.id, and each category's event payload (call direction/missed, SOS, power, low battery).
+via sender.id, and each category's event payload (call direction/missed, SOS, power, low battery, safe zone).
 No Home Assistant, no network -- just the pure planning logic over `SimpleChat` entries.
 """
 
@@ -9,12 +9,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from custom_components.xplora_watch.const import EVENT_CALL, EVENT_LOW_POWER, EVENT_POWER, EVENT_SOS
+from custom_components.xplora_watch.const import EVENT_CALL, EVENT_LOW_POWER, EVENT_POWER, EVENT_SAFEZONE, EVENT_SOS
 from custom_components.xplora_watch.notifications import HighWater, plan_events
 from custom_components.xplora_watch.pyxplora_api.model import SimpleChat
 
 # Every category enabled -- individual tests narrow this to prove gating.
-ALL = {"notify_call", "notify_sos", "notify_power", "notify_low_power"}
+ALL = {"notify_call", "notify_sos", "notify_power", "notify_low_power", "notify_safezone"}
 
 
 def _entry(id: str, type: str, create: int, sender: str = "w-uid", **data: Any) -> SimpleChat:
@@ -123,6 +123,45 @@ def test_low_power_payload() -> None:
     ev = plan_events(feed, mark=HighWater(create=200, ids=frozenset({"x"})), enabled=ALL).events[0]
     assert ev.event_type == EVENT_LOW_POWER
     assert ev.data["battery"] == 5
+
+
+def test_safezone_arrive_leave_share_one_event_type_distinguished_by_state() -> None:
+    feed = _feed(
+        _entry("in", "ARRIVE_SAFE_ZONE", 210, lat=52.2, lng=21.0, radius=300, poi="School", address="Main St 1", battery=80),
+        _entry("out", "LEAVE_SAFE_ZONE", 220, lat=52.3, lng=21.1, battery=79),
+    )
+    events = plan_events(feed, mark=HighWater(create=200, ids=frozenset({"x"})), enabled=ALL).events
+    by_id = {e.data["id"]: e for e in events}
+    arrive, leave = by_id["in"], by_id["out"]
+    assert arrive.event_type == EVENT_SAFEZONE and arrive.data["state"] == "arrive"
+    assert leave.event_type == EVENT_SAFEZONE and leave.data["state"] == "leave"
+    assert arrive.data["poi"] == "School"
+    assert arrive.data["address"] == "Main St 1"
+    assert arrive.data["radius"] == 300
+    assert (arrive.data["lat"], arrive.data["lng"], arrive.data["battery"]) == (52.2, 21.0, 80)
+    # Absent fields stay None rather than being dropped, so automations can rely on the keys.
+    assert leave.data["poi"] is None and leave.data["text"] is None
+
+
+def test_safezone_text_falls_back_to_capitalised_key() -> None:
+    feed = _feed(_entry("in", "ARRIVE_SAFE_ZONE", 300, Text="Arrived at School"))
+    ev = plan_events(feed, mark=HighWater(create=200, ids=frozenset({"x"})), enabled=ALL).events[0]
+    assert ev.data["text"] == "Arrived at School"
+
+
+def test_safezone_disabled_does_not_fire_but_advances_mark() -> None:
+    feed = _feed(_entry("in", "ARRIVE_SAFE_ZONE", 300), _entry("out", "LEAVE_SAFE_ZONE", 300))
+    result = plan_events(feed, mark=HighWater(create=200, ids=frozenset({"x"})), enabled=ALL - {"notify_safezone"})
+    assert result.events == []
+    assert result.mark == HighWater(create=300, ids=frozenset({"in", "out"}))
+
+
+def test_safezone_baseline_silent_then_deduped() -> None:
+    feed = _feed(_entry("in", "ARRIVE_SAFE_ZONE", 300))
+    first = plan_events(feed, mark=None, enabled=ALL)
+    assert first.events == []
+    again = plan_events(feed + _feed(_entry("out", "LEAVE_SAFE_ZONE", 300)), mark=first.mark, enabled=ALL)
+    assert [e.data["id"] for e in again.events] == ["out"]
 
 
 def test_overflow_flag_when_every_fetched_entry_is_new() -> None:

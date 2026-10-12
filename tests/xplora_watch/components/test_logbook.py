@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.xplora_watch.const import DOMAIN, EVENT_CALL, EVENT_LOW_POWER, EVENT_POWER, EVENT_SOS
+from custom_components.xplora_watch.const import DOMAIN, EVENT_CALL, EVENT_LOW_POWER, EVENT_POWER, EVENT_SAFEZONE, EVENT_SOS
 from custom_components.xplora_watch.logbook import async_describe_events
 
 
@@ -29,8 +29,8 @@ def _describe(hass: HomeAssistant, event_type: str, **data: Any) -> dict[str, st
     return _describers(hass)[event_type](SimpleNamespace(data=data))
 
 
-def test_all_four_event_types_registered(hass: HomeAssistant) -> None:
-    assert set(_describers(hass)) == {EVENT_CALL, EVENT_SOS, EVENT_POWER, EVENT_LOW_POWER}
+def test_all_event_types_registered(hass: HomeAssistant) -> None:
+    assert set(_describers(hass)) == {EVENT_CALL, EVENT_SOS, EVENT_POWER, EVENT_LOW_POWER, EVENT_SAFEZONE}
 
 
 def test_missed_incoming_call_line(hass: HomeAssistant) -> None:
@@ -73,6 +73,21 @@ def test_power_line_reflects_state(hass: HomeAssistant) -> None:
 def test_low_power_line_has_battery(hass: HomeAssistant) -> None:
     msg = _describe(hass, EVENT_LOW_POWER, battery=5)[LOGBOOK_ENTRY_MESSAGE]
     assert "5" in msg
+
+
+def test_safezone_arrive_line_names_the_place(hass: HomeAssistant) -> None:
+    msg = _describe(hass, EVENT_SAFEZONE, state="arrive", poi="School", address="Main St 1", battery=80)[LOGBOOK_ENTRY_MESSAGE]
+    assert msg == "arrived at School (battery 80%)"
+
+
+def test_safezone_leave_line_falls_back_to_address(hass: HomeAssistant) -> None:
+    msg = _describe(hass, EVENT_SAFEZONE, state="leave", address="Main St 1")[LOGBOOK_ENTRY_MESSAGE]
+    assert msg == "left Main St 1"
+
+
+def test_safezone_line_without_place_is_generic(hass: HomeAssistant) -> None:
+    msg = _describe(hass, EVENT_SAFEZONE, state="arrive")[LOGBOOK_ENTRY_MESSAGE]
+    assert msg == "arrived at a safe zone"
 
 
 def test_missing_direction_does_not_double_the_word_call(hass: HomeAssistant) -> None:

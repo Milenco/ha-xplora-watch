@@ -119,7 +119,7 @@ BASE_SEE_SERVICE_SCHEMA = _target_schema()
 # On-demand refresh of alarms/silent-times/safe-zones (the "functions" data that has its own,
 # default-off poll interval).
 BASE_REFRESH_FUNCTIONS_SERVICE_SCHEMA = _target_schema()
-# On-demand, account-wide fetch of the notification feed (calls, SOS, power, low battery). The device
+# On-demand, account-wide fetch of the notification feed (calls, SOS, power, low battery, safe zones). The device
 # target selects the account; the fetch itself is account-wide (one request).
 BASE_REFRESH_NOTIFICATIONS_SERVICE_SCHEMA = _target_schema()
 # Fetch + cache one past day's location track (default: yesterday). `date` is an optional
@@ -782,7 +782,7 @@ class XploraRefreshFunctionsService(XploraService):
 
 
 class XploraRefreshNotificationsService(XploraService):
-    """On-demand, account-wide fetch of the notification feed (calls, SOS, power, low battery)."""
+    """On-demand, account-wide fetch of the notification feed (calls, SOS, power, low battery, safe zones)."""
 
     async def async_refresh_notifications(self, **kwargs: Any) -> None:
         """Fetch + process the feed once per targeted account, so new events fire with polling off."""

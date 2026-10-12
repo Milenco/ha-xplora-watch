@@ -1,7 +1,7 @@
 # Call & notification activity
 
 The watch's account keeps a **notification feed** — the same list the phone app shows: calls, SOS
-alarms, the watch powering on/off, and low-battery warnings. Home Assistant can surface each of
+alarms, the watch powering on/off, low-battery warnings, and arriving at or leaving a safe zone. Home Assistant can surface each of
 these as an **event** you can automate on, plus a **most-recent-call sensor** and a full-detail
 **logbook** line per event.
 
@@ -18,6 +18,7 @@ these as an **event** you can automate on, plus a **most-recent-call sensor** an
   - `xplora_watch_sos` — the watch sent an SOS
   - `xplora_watch_power` — the watch powered on or off
   - `xplora_watch_low_power` — the watch reported low battery
+  - `xplora_watch_safezone` — the watch arrived at or left one of its [safe zones](safe-zones.md)
 - **A most-recent-call sensor** (`sensor.<watch>_last_call`, disabled by default) whose state is the
   **time of the last call**. Contact name/number, direction, duration and the missed flag are
   attributes.
@@ -65,6 +66,7 @@ run is one request.
 | Calls | Off | `xplora_watch_call` | Incoming / outgoing / missed. Carries contact PII — see [Privacy](#privacy). |
 | Power on/off | Off | `xplora_watch_power` | Low-stakes; opt in if you want it. |
 | Low battery | Off | `xplora_watch_low_power` | The battery **level** is already a sensor; this marks the crossing. |
+| Safe zones | Off | `xplora_watch_safezone` | Arrive and leave, as the watch reports them to the app. Carries the location. |
 
 Enabling a category is **baseline-silent**: it starts firing for activity *from then on*, and does
 not replay the backlog that happened before you turned it on (or before Home Assistant restarted).
@@ -91,6 +93,28 @@ action:
 (`on`/`off`); `xplora_watch_low_power` carries `battery`. Every event also carries the watch's
 `device_id`, so you can trigger on the device directly.
 
+`xplora_watch_safezone` carries `state` (`arrive`/`leave`), `lat`/`lng`, `radius`, `address`,
+`poi`, `text` and `battery`. Which of these holds the safe zone's **name** has not been confirmed
+against a real feed entry yet; `poi` is the best candidate. Example — notify on arrive and leave:
+
+```yaml
+alias: Notify on safe-zone changes
+trigger:
+  - platform: event
+    event_type: xplora_watch_safezone
+action:
+  - service: notify.notify
+    data:
+      message: >-
+        {{ 'Arrived at' if trigger.event.data.state == 'arrive' else 'Left' }}
+        {{ trigger.event.data.poi or trigger.event.data.address or 'a safe zone' }}
+```
+
+> [!TIP]
+> To see exactly what the server sends for a safe-zone entry, enable the opt-in raw logger
+> (`custom_components.xplora_watch.pyxplora_api.raw: debug`): it dumps the unparsed `data` of each
+> safe-zone entry. It contains location data, so turn it off again afterwards.
+
 > [!NOTE]
 > `direction` is a best-effort reading of the call type and may be refined later; automate on it as a
 > value, but don't hard-code a whole automation around telling incoming from outgoing yet.
@@ -104,11 +128,12 @@ which are deliberately kept out of the recorder database.
 
 ## Privacy
 
-Enabling **Calls** or **SOS** writes personal data into Home Assistant's **recorder database**,
+Enabling **Calls**, **SOS** or **Safe zones** writes personal data into Home Assistant's **recorder database**,
 because the logbook line for each event is recorded — and those lines contain, by design:
 
 - for a **call**: the contact's **phone number and name**;
-- for an **SOS**: the watch's **GPS coordinates** at the time.
+- for an **SOS**: the watch's **GPS coordinates** at the time;
+- for a **safe-zone** change: the place name or address the watch reported.
 
 This is a deliberate trade for in-logbook visibility; it is **not a privacy guarantee**. If you would
 rather not store contact numbers in your database, leave **Calls** off.

@@ -14,7 +14,7 @@ from .exception_classes import AUTH_TOKEN_EXPIRED_CODE, AuthError, HandlerExcept
 from .graphql_client import GraphqlClient
 from .handler_gql import HandlerGQL
 from .model import Chats, ChatsNew, Notifications
-from .status import EmailAndPhoneVerificationTypeV2, NormalStatus, UserContactType
+from .status import ChatType, EmailAndPhoneVerificationTypeV2, NormalStatus, UserContactType
 from .watch_commands import WatchCommand
 
 _LOGGER = logging.getLogger(__name__)
@@ -299,7 +299,7 @@ class GQLHandler(HandlerGQL):
     async def notifications_a(
         self, uid: str = "", offset: int = 0, limit: int = 20, asObject: bool = False
     ) -> dict[str, Any] | Notifications:
-        """Fetch one page of the account notification feed (calls, SOS, power, low battery).
+        """Fetch one page of the account notification feed (calls, SOS, power, low battery, safe zones).
 
         Read-only: `uid=""` is account-wide (all watches). The sibling `setReadAllNotifications`
         mutation is deliberately never implemented -- it would clear the guardian's unread state as
@@ -318,6 +318,12 @@ class GQLHandler(HandlerGQL):
             _LOGGER.debug("notifications feed returned errors: %s", errors)
         if errors or res.get("data", None) is None:
             return Notifications.from_dict({}) if asObject else {}
+        if _RAW_LOGGER.isEnabledFor(logging.DEBUG):
+            # Safe-zone entries: dump the raw `data` before `Data` drops unknown keys, so where the zone
+            # name lives can be read off a real entry. Opt-in `_RAW_LOGGER` only (location/PII).
+            for entry in ((res.get("data") or {}).get("notifications") or {}).get("list") or []:
+                if isinstance(entry, dict) and entry.get("type") in (ChatType.ARRIVE_SAFE_ZONE.value, ChatType.LEAVE_SAFE_ZONE.value):
+                    _RAW_LOGGER.debug("raw notifications %s data: %s", entry.get("type"), entry.get("data"))
         if asObject:
             return Notifications.from_dict(res.get("data", {}))
         return res.get("data", {})

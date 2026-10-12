@@ -107,6 +107,7 @@
           "notify_call": "Call activity events",
           "notify_power": "Power on/off events",
           "notify_low_power": "Low-battery events",
+          "notify_safezone": "Safe-zone arrive/leave events",
           "opencage_apikey": "OpenCage API KEY",
           "refresh_on_card_render": "Refresh data when dashboard cards are shown",
           "remove_message": "show deleted messages?",
@@ -124,7 +125,8 @@
           "notify_sos": "Fire a Home Assistant event, and write a logbook line, when the watch sends an SOS. On by default. Only fires while polling is on. The logbook line records the SOS location (latitude/longitude) into the Home Assistant recorder database — a deliberate trade for visibility, not a privacy guarantee.",
           "notify_call": "Fire a Home Assistant event, and write a logbook line, for each call (incoming, outgoing, missed). Off by default. Only fires while polling is on. The logbook line records the contact's phone number and name into the Home Assistant recorder database — a deliberate trade for visibility, not a privacy guarantee. Leave off if you do not want contact numbers stored in your database.",
           "notify_power": "Fire a Home Assistant event, and write a logbook line, when the watch powers on or off. Off by default. Only fires while polling is on.",
-          "notify_low_power": "Fire a Home Assistant event, and write a logbook line, when the watch reports low battery. Off by default. Only fires while polling is on."
+          "notify_low_power": "Fire a Home Assistant event, and write a logbook line, when the watch reports low battery. Off by default. Only fires while polling is on.",
+          "notify_safezone": "Fire a Home Assistant event, and write a logbook line, when the watch reports arriving at or leaving one of its safe zones. Off by default. Only fires while polling is on. The event and logbook line carry the reported location into the Home Assistant recorder database."
         },
         "title": "further settings for HA Xplora® Watch"
       }

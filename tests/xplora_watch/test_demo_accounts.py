@@ -306,7 +306,7 @@ async def test_demo_account_serves_a_synthetic_notification_feed() -> None:
     feed = await controller.getNotifications(limit=20)
 
     types = {entry.type for entry in feed}
-    assert {"CALL_LOG", "SOS", "POWER_ON", "LOW_POWER"} <= types
+    assert {"CALL_LOG", "SOS", "POWER_ON", "LOW_POWER", "ARRIVE_SAFE_ZONE"} <= types
     # Every entry routes to this account's watch via sender.id.
     assert feed and all(entry.sender and entry.sender.id == DEMO_WUID for entry in feed)
 

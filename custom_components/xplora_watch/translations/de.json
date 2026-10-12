@@ -106,6 +106,7 @@
           "notify_call": "Anrufaktivitäts-Ereignisse",
           "notify_power": "Ein-/Ausschalt-Ereignisse",
           "notify_low_power": "Ereignisse bei niedrigem Akkustand",
+          "notify_safezone": "Ereignisse beim Betreten/Verlassen von Sicherheitszonen",
           "refresh_on_card_render": "Daten beim Anzeigen der Dashboard-Karten aktualisieren",
           "remove_message": "gelöschte Nachrichten anzeigen?",
           "scan_interval": "Aktualisierungsintervall (Aus deaktiviert das Abrufen)",
@@ -123,6 +124,7 @@
           "notify_call": "Löst ein Home-Assistant-Ereignis aus und schreibt eine Logbuchzeile für jeden Anruf (eingehend, ausgehend, verpasst). Standardmäßig deaktiviert. Wird nur ausgelöst, während das Abrufen aktiv ist. Die Logbuchzeile speichert die Telefonnummer und den Namen des Kontakts in der Home-Assistant-Recorder-Datenbank – ein bewusster Kompromiss für die Sichtbarkeit, keine Datenschutzgarantie. Lassen Sie diese Option deaktiviert, wenn Sie keine Kontaktnummern in Ihrer Datenbank speichern möchten.",
           "notify_power": "Löst ein Home-Assistant-Ereignis aus und schreibt eine Logbuchzeile, wenn die Uhr ein- oder ausgeschaltet wird. Standardmäßig deaktiviert. Wird nur ausgelöst, während das Abrufen aktiv ist.",
           "notify_low_power": "Löst ein Home-Assistant-Ereignis aus und schreibt eine Logbuchzeile, wenn die Uhr einen niedrigen Akkustand meldet. Standardmäßig deaktiviert. Wird nur ausgelöst, während das Abrufen aktiv ist.",
+          "notify_safezone": "Löst ein Home-Assistant-Ereignis aus und schreibt eine Logbuchzeile, wenn die Uhr das Betreten oder Verlassen einer ihrer Sicherheitszonen meldet. Standardmäßig deaktiviert. Wird nur ausgelöst, während das Abrufen aktiv ist. Ereignis und Logbuchzeile speichern den gemeldeten Standort in der Recorder-Datenbank von Home Assistant.",
           "account_alias": "Benennt das Uhrengerät dieses Kontos beim nächsten Neuladen um (z. B. „Dana Watch (Mama)“). Vorhandene Entitäts-IDs behalten ihren ursprünglichen Namen, sodass darauf verweisende Automationen und Dashboards weiter funktionieren."
         },
         "title": "weitere Einstellungen für HA Xplora® Watch"

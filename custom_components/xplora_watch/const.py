@@ -109,7 +109,8 @@ CONF_HOME_LATITUDE: Final = "home_latitude"
 CONF_HOME_LONGITUDE: Final = "home_longitude"
 CONF_HOME_RADIUS: Final = "home_radius"
 CONF_AUTO_MARK_READ: Final = "auto_mark_read"
-# Per-category opt-in toggles for the account notification feed (calls, SOS, power, low battery).
+# Per-category opt-in toggles for the account notification feed (calls, SOS, power, low battery,
+# safe-zone arrive/leave).
 # Gate what fires once polling is on; SOS defaults ON (safety), the rest OFF (PII/noise). See
 # ADR 0016. Enabling calls or SOS writes contact numbers/names + SOS GPS to the recorder via the
 # logbook line -- a documented trade, not a privacy guarantee.
@@ -117,6 +118,7 @@ CONF_NOTIFY_CALL: Final = "notify_call"
 CONF_NOTIFY_SOS: Final = "notify_sos"
 CONF_NOTIFY_POWER: Final = "notify_power"
 CONF_NOTIFY_LOW_POWER: Final = "notify_low_power"
+CONF_NOTIFY_SAFEZONE: Final = "notify_safezone"
 # One page per poll, newest-first, no auto-paging (ADR 0015). >20 new entries between two polls is
 # implausible for a child's watch on the coarse cadence; the overflow is dropped with a warning
 # rather than paged deeper (every extra page is another request against a ban-sensitive account).
@@ -147,6 +149,8 @@ EVENT_CALL: Final = f"{DOMAIN}_call"
 EVENT_SOS: Final = f"{DOMAIN}_sos"
 EVENT_POWER: Final = f"{DOMAIN}_power"
 EVENT_LOW_POWER: Final = f"{DOMAIN}_low_power"
+# Safe-zone arrive/leave share one event; the direction is the payload `state` (ADR 0014).
+EVENT_SAFEZONE: Final = f"{DOMAIN}_safezone"
 # When enabled, the integration automatically fetches the previous day's location track at 01:00
 # local time — only if the day's data is not already cached. Removes the need for a manual
 # automation calling `xplora_watch.fetch_history` daily.

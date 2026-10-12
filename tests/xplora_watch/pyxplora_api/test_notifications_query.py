@@ -8,6 +8,7 @@ guardian's account-wide unread state as a polling side effect.
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import pytest
@@ -134,3 +135,39 @@ def test_setreadallnotifications_is_never_implemented() -> None:
                 docs.extend(value for value in attr.values() if isinstance(value, str))
     assert "setReadAllNotifications" not in "".join(docs)
     assert not any(name.lower().startswith("setreadall") for name in dir(GQLHandler))
+
+
+async def test_notifications_a_dumps_raw_safezone_data_on_raw_logger_only(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    # The safe-zone `data` keys are not pinned down yet, and `Data` drops unknown ones on parse; the
+    # opt-in raw logger dumps them unparsed so a real entry shows where the zone name lives.
+    handler = _handler()
+    zone_data = {"poi": "School", "zoneName": "Szkoła"}
+
+    async def _fake(query: str, variables: dict[str, Any] | None = None, operation_name: str | None = None) -> dict[str, Any]:
+        return {
+            "data": {
+                "notifications": {
+                    "list": [
+                        {"id": "z", "type": "ARRIVE_SAFE_ZONE", "create": 1, "sender": {"id": "w"}, "data": zone_data},
+                        {"id": "c", "type": "CALL_LOG", "create": 2, "sender": {"id": "w"}, "data": {"call_number": "+49"}},
+                    ]
+                }
+            }
+        }
+
+    monkeypatch.setattr(handler, "runAuthorizedGqlQuery_a", _fake)
+    raw_logger = "custom_components.xplora_watch.pyxplora_api.raw"
+
+    with caplog.at_level(logging.DEBUG, logger="custom_components.xplora_watch.pyxplora_api.gql_handler_async"):
+        await handler.notifications_a(uid="", asObject=True)
+    assert "zoneName" not in caplog.text
+
+    caplog.clear()
+    with caplog.at_level(logging.DEBUG, logger=raw_logger):
+        await handler.notifications_a(uid="", asObject=True)
+    raw = [r.getMessage() for r in caplog.records if r.name == raw_logger]
+    assert len(raw) == 1
+    assert "ARRIVE_SAFE_ZONE" in raw[0] and "zoneName" in raw[0]
+    assert "+49" not in raw[0]

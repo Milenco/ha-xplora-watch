@@ -16,7 +16,7 @@ from homeassistant.helpers import device_registry as dr
 from pytest_homeassistant_custom_component.common import async_capture_events
 
 from custom_components.xplora_watch.config import resolve
-from custom_components.xplora_watch.const import DOMAIN, EVENT_CALL, EVENT_SOS
+from custom_components.xplora_watch.const import DOMAIN, EVENT_CALL, EVENT_SAFEZONE, EVENT_SOS
 from custom_components.xplora_watch.coordinator import XploraDataUpdateCoordinator
 from custom_components.xplora_watch.notifications import HighWater
 from custom_components.xplora_watch.pyxplora_api.model import SimpleChat
@@ -36,7 +36,9 @@ def _register_device(hass: HomeAssistant, coordinator: XploraDataUpdateCoordinat
 
 
 def _enable(coordinator: XploraDataUpdateCoordinator, **flags: bool) -> None:
-    coordinator._resolved = resolve({"notify_call": False, "notify_sos": False, "notify_power": False, "notify_low_power": False, **flags})
+    coordinator._resolved = resolve(
+        {"notify_call": False, "notify_sos": False, "notify_power": False, "notify_low_power": False, "notify_safezone": False, **flags}
+    )
 
 
 async def _noop_init(*_a: Any, **_k: Any) -> None:
@@ -82,6 +84,23 @@ async def test_second_poll_fires_call_event_routed_to_device(coordinator: Xplora
     # Most-recent-call sensor stash -- held outside coordinator.data so the poll rebuild can't wipe it.
     assert coordinator._last_call[DEFAULT_WUID]["call_number"] == "+49123"
     assert coordinator._notifications_mark == HighWater(create=300, ids=frozenset({"c"}))
+
+
+async def test_safezone_events_fire_routed_to_device(coordinator: XploraDataUpdateCoordinator) -> None:
+    _enable(coordinator, notify_safezone=True)
+    device_id = _register_device(coordinator.hass, coordinator)
+    coordinator._notifications_mark = HighWater(create=100, ids=frozenset({"old"}))
+    events = async_capture_events(coordinator.hass, EVENT_SAFEZONE)
+    _feed(coordinator, [_entry("out", "LEAVE_SAFE_ZONE", 400, poi="School"), _entry("in", "ARRIVE_SAFE_ZONE", 300, poi="School")])
+
+    await coordinator._process_notifications()
+    await coordinator.hass.async_block_till_done()
+
+    assert [(e.data["state"], e.data["poi"], e.data["device_id"]) for e in events] == [
+        ("arrive", "School", device_id),
+        ("leave", "School", device_id),
+    ]
+    assert coordinator._notifications_mark == HighWater(create=400, ids=frozenset({"out"}))
 
 
 async def test_unmatched_sender_is_skipped_but_mark_advances(coordinator: XploraDataUpdateCoordinator) -> None:

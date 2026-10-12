@@ -55,6 +55,7 @@ from .const import (
     CONF_NOTIFY_CALL,
     CONF_NOTIFY_LOW_POWER,
     CONF_NOTIFY_POWER,
+    CONF_NOTIFY_SAFEZONE,
     CONF_NOTIFY_SOS,
     CONF_OPENCAGE_APIKEY,
     CONF_PHONENUMBER,
@@ -391,6 +392,7 @@ class XploraOptionsFlowHandler(OptionsFlowWithConfigEntry):
                 vol.Required(CONF_NOTIFY_CALL, default=_options.get(CONF_NOTIFY_CALL, False)): BooleanSelector(),
                 vol.Required(CONF_NOTIFY_POWER, default=_options.get(CONF_NOTIFY_POWER, False)): BooleanSelector(),
                 vol.Required(CONF_NOTIFY_LOW_POWER, default=_options.get(CONF_NOTIFY_LOW_POWER, False)): BooleanSelector(),
+                vol.Required(CONF_NOTIFY_SAFEZONE, default=_options.get(CONF_NOTIFY_SAFEZONE, False)): BooleanSelector(),
                 vol.Required(
                     CONF_REFRESH_ON_CARD_RENDER,
                     default=_options.get(CONF_REFRESH_ON_CARD_RENDER, DEFAULT_REFRESH_ON_CARD_RENDER),

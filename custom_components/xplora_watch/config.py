@@ -43,6 +43,7 @@ from .const import (
     CONF_NOTIFY_CALL,
     CONF_NOTIFY_LOW_POWER,
     CONF_NOTIFY_POWER,
+    CONF_NOTIFY_SAFEZONE,
     CONF_NOTIFY_SOS,
     CONF_OPENCAGE_APIKEY,
     CONF_REFRESH_ON_CARD_RENDER,
@@ -89,6 +90,7 @@ class ConfKeys(StrEnum):
     NOTIFY_SOS = CONF_NOTIFY_SOS
     NOTIFY_POWER = CONF_NOTIFY_POWER
     NOTIFY_LOW_POWER = CONF_NOTIFY_LOW_POWER
+    NOTIFY_SAFEZONE = CONF_NOTIFY_SAFEZONE
     OPENCAGE_APIKEY = CONF_OPENCAGE_APIKEY
     REFRESH_ON_CARD_RENDER = CONF_REFRESH_ON_CARD_RENDER
     REMOVE_MESSAGE = CONF_REMOVE_MESSAGE
@@ -142,11 +144,12 @@ CONF_SPECS: dict[ConfKeys, _ConfSpec[Any]] = {
     ConfKeys.MAPS: _ConfSpec(default=MAPS[0], converter=_Converters.to_str),
     ConfKeys.MESSAGE: _ConfSpec(default=10, converter=_Converters.to_int),
     # Per-category notification toggles. SOS defaults ON (the one safety category a polling user
-    # should get without discovering a setting); calls/power/low-battery default OFF (ADR 0016).
+    # should get without discovering a setting); calls/power/low-battery/safe-zone default OFF (ADR 0016).
     ConfKeys.NOTIFY_CALL: _ConfSpec(default=False, converter=_Converters.to_bool),
     ConfKeys.NOTIFY_SOS: _ConfSpec(default=True, converter=_Converters.to_bool),
     ConfKeys.NOTIFY_POWER: _ConfSpec(default=False, converter=_Converters.to_bool),
     ConfKeys.NOTIFY_LOW_POWER: _ConfSpec(default=False, converter=_Converters.to_bool),
+    ConfKeys.NOTIFY_SAFEZONE: _ConfSpec(default=False, converter=_Converters.to_bool),
     ConfKeys.OPENCAGE_APIKEY: _ConfSpec(default="", converter=_Converters.to_str),
     ConfKeys.REFRESH_ON_CARD_RENDER: _ConfSpec(default=DEFAULT_REFRESH_ON_CARD_RENDER, converter=_Converters.to_bool),
     ConfKeys.REMOVE_MESSAGE: _ConfSpec(default=False, converter=_Converters.to_bool),
@@ -174,6 +177,7 @@ class ResolvedOptions:
     notify_sos: bool
     notify_power: bool
     notify_low_power: bool
+    notify_safezone: bool
     opencage_apikey: str
     refresh_on_card_render: bool
     remove_message: bool

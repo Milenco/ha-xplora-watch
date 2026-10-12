@@ -106,6 +106,7 @@
           "notify_call": "Événements d'activité d'appel",
           "notify_power": "Événements de marche/arrêt",
           "notify_low_power": "Événements de batterie faible",
+          "notify_safezone": "Événements d'entrée/sortie de zone de sécurité",
           "refresh_on_card_render": "Actualiser les données à l'affichage des cartes du tableau de bord",
           "remove_message": "afficher les messages supprimés ?",
           "scan_interval": "Intervalle de mise à jour (Désactivé arrête l'interrogation)",
@@ -123,6 +124,7 @@
           "notify_call": "Déclenche un événement Home Assistant et écrit une ligne de journal pour chaque appel (entrant, sortant, manqué). Désactivé par défaut. Ne se déclenche que lorsque l'interrogation est active. La ligne de journal enregistre le numéro de téléphone et le nom du contact dans la base de données de l'enregistreur (recorder) de Home Assistant — un compromis délibéré pour la visibilité, pas une garantie de confidentialité. Laissez désactivé si vous ne voulez pas stocker les numéros de contact dans votre base de données.",
           "notify_power": "Déclenche un événement Home Assistant et écrit une ligne de journal lorsque la montre s'allume ou s'éteint. Désactivé par défaut. Ne se déclenche que lorsque l'interrogation est active.",
           "notify_low_power": "Déclenche un événement Home Assistant et écrit une ligne de journal lorsque la montre signale une batterie faible. Désactivé par défaut. Ne se déclenche que lorsque l'interrogation est active.",
+          "notify_safezone": "Déclenche un événement Home Assistant et écrit une ligne de journal lorsque la montre signale qu'elle entre dans l'une de ses zones de sécurité ou en sort. Désactivé par défaut. Ne se déclenche que lorsque l'interrogation est active. L'événement et la ligne de journal enregistrent la position signalée dans la base de données du recorder de Home Assistant.",
           "account_alias": "Renomme l'appareil montre de ce compte au prochain rechargement (par ex. « Dana Watch (Maman) »). Les identifiants d'entités existants conservent leur nom d'origine, afin que les automatisations et tableaux de bord qui les référencent continuent de fonctionner."
         },
         "title": "paramètres supplémentaires pour HA Xplora® Watch"

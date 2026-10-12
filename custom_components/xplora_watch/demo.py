@@ -592,7 +592,7 @@ class DemoPyXploraApi(PyXploraApi):
         return ChatsNew(messages).to_dict()
 
     async def getNotifications(self, uid: str = "", offset: int = 0, limit: int = 20) -> list[SimpleChat]:
-        """A network-free notification feed so the call/SOS/power/low-battery surface is demoable.
+        """A network-free notification feed so the call/SOS/power/low-battery/safe-zone surface is demoable.
 
         One synthetic entry per category, all routed to this account's watch via `sender.id`. No real
         CALL_LOG was ever captured, so the call entry is built from the documented fields (ref:XW-020):
@@ -632,6 +632,12 @@ class DemoPyXploraApi(PyXploraApi):
             _entry("sos", ChatType.SOS, now - 1800, Data(lat=profile.lat, lng=profile.lng, battery=profile.battery)),
             _entry("power", ChatType.POWER_ON, now - 3600, Data(lat=profile.lat, lng=profile.lng, battery=profile.battery)),
             _entry("lowpower", ChatType.LOW_POWER, now - 7200, Data(battery=15)),
+            _entry(
+                "zone",
+                ChatType.ARRIVE_SAFE_ZONE,
+                now - 10800,
+                Data(lat=profile.lat, lng=profile.lng, poi="School", battery=profile.battery),
+            ),
         ]
 
     async def getWatchLocHistory(self, wuid: str, *args: Any, **kwargs: Any) -> dict[str, Any]:

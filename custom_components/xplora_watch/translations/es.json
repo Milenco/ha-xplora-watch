@@ -106,6 +106,7 @@
           "notify_call": "Eventos de actividad de llamadas",
           "notify_power": "Eventos de encendido/apagado",
           "notify_low_power": "Eventos de batería baja",
+          "notify_safezone": "Eventos de entrada/salida de zonas seguras",
           "refresh_on_card_render": "Actualizar datos al mostrar las tarjetas del panel",
           "remove_message": "¿mostrar mensajes eliminados?",
           "scan_interval": "Intervalo de actualización (Desactivado detiene el sondeo)",
@@ -123,6 +124,7 @@
           "notify_call": "Dispara un evento de Home Assistant y escribe una línea en el registro por cada llamada (entrante, saliente, perdida). Desactivado de forma predeterminada. Solo se dispara mientras el sondeo está activo. La línea del registro guarda el número de teléfono y el nombre del contacto en la base de datos del grabador (recorder) de Home Assistant: una concesión deliberada a la visibilidad, no una garantía de privacidad. Déjalo desactivado si no quieres almacenar números de contacto en tu base de datos.",
           "notify_power": "Dispara un evento de Home Assistant y escribe una línea en el registro cuando el reloj se enciende o se apaga. Desactivado de forma predeterminada. Solo se dispara mientras el sondeo está activo.",
           "notify_low_power": "Dispara un evento de Home Assistant y escribe una línea en el registro cuando el reloj informa de batería baja. Desactivado de forma predeterminada. Solo se dispara mientras el sondeo está activo.",
+          "notify_safezone": "Dispara un evento de Home Assistant y escribe una línea en el registro cuando el reloj informa de que entra o sale de una de sus zonas seguras. Desactivado de forma predeterminada. Solo se dispara mientras el sondeo está activo. El evento y la línea del registro guardan la ubicación informada en la base de datos del recorder de Home Assistant.",
           "account_alias": "Renombra el dispositivo del reloj de esta cuenta en la próxima recarga (p. ej. «Dana Watch (Mamá)»). Los identificadores de entidad existentes conservan su nombre original, por lo que las automatizaciones y los paneles que los referencian siguen funcionando."
         },
         "title": "configuraciones adicionales para HA Xplora® Watch"

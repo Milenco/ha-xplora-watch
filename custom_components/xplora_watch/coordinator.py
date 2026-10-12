@@ -873,7 +873,9 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
     def _enabled_notification_categories(self) -> set[str]:
         """The option fields whose notification category is currently on (ADR 0016)."""
         opts = self._resolved
-        return {name for name in ("notify_call", "notify_sos", "notify_power", "notify_low_power") if getattr(opts, name)}
+        return {
+            name for name in ("notify_call", "notify_sos", "notify_power", "notify_low_power", "notify_safezone") if getattr(opts, name)
+        }
 
     async def _process_notifications(self) -> None:
         """Poll-path wrapper: run one notification cycle, best-effort.
@@ -953,7 +955,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
         """On-demand, account-wide fetch + processing of the notification feed (one request).
 
         Independent of the status poll, so the `refresh_notifications` service and the
-        `check_notifications` button can surface new calls/SOS/power/low-battery entries even with
+        `check_notifications` button can surface new calls/SOS/power/low-battery/safe-zone entries even with
         polling off -- an explicit user/automation action, not a new automatic cadence (ADR 0015).
         Runs the cycle unwrapped (unlike the swallowing poll path), so a fetch/planning failure
         propagates to the button/service and is reported instead of a phantom success; listeners are

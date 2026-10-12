@@ -45,6 +45,7 @@ def test_resolve_empty_returns_defaults() -> None:
         notify_sos=True,
         notify_power=False,
         notify_low_power=False,
+        notify_safezone=False,
         opencage_apikey="",
         refresh_on_card_render=False,
         remove_message=False,

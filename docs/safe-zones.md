@@ -28,3 +28,9 @@ Three kinds of entities surface them (all Guardian-only — see [Account types](
 The overview card's **Safe zone tile** combines the first two: it shows **Outside** when the
 binary sensor alerts, the reported zone name while inside one (with the `current_safezone`
 sensor enabled), and plain **Inside** when no zone name is known.
+
+All of the above follow the watch's **location** reports, so they only change when Home Assistant
+gets a fresh position. The watch also reports **arriving at and leaving** a safe zone to the
+account's notification feed, the same source the app's alerts come from. Turn on the **Safe zones**
+category to get these as `xplora_watch_safezone` events; see
+[Call & notification activity](notifications.md).
