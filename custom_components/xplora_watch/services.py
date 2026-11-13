@@ -566,9 +566,7 @@ async def async_setup_services(hass: HomeAssistant, entry_id: str) -> None:
     hass.services.async_register(DOMAIN, ATTR_SERVICE_READ_MSG, async_read_message, schema=BASE_READ_MESSAGE_SERVICE_SCHEMA)
     hass.services.async_register(DOMAIN, ATTR_SERVICE_SEND_MSG, async_send_message, schema=BASE_SEND_MESSAGE_SERVICE_SCHEMA)
     hass.services.async_register(DOMAIN, ATTR_SERVICE_SEE, async_see, schema=BASE_SEE_SERVICE_SCHEMA)
-    hass.services.async_register(
-        DOMAIN, ATTR_SERVICE_REFRESH_LOCATION, async_refresh_location, schema=BASE_REFRESH_LOCATION_SERVICE_SCHEMA
-    )
+    hass.services.async_register(DOMAIN, ATTR_SERVICE_REFRESH_LOCATION, async_refresh_location, schema=BASE_REFRESH_LOCATION_SERVICE_SCHEMA)
     hass.services.async_register(
         DOMAIN, ATTR_SERVICE_REFRESH_FUNCTIONS, async_refresh_functions, schema=BASE_REFRESH_FUNCTIONS_SERVICE_SCHEMA
     )

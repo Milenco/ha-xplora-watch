@@ -15,6 +15,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import (
+    ATTR_IGNORED_FIX,
     ATTR_SERVICE_USER,
     ATTR_TRACKER_ADDR,
     ATTR_TRACKER_DISTOHOME,
@@ -26,7 +27,6 @@ from .const import (
     ATTR_TRACKER_POI,
     ATTR_TRACKER_RAD,
     ATTR_TRACKER_SAFEZONE_NAME,
-    ATTR_IGNORED_FIX,
     ATTR_WATCH,
     CONF_WATCHES,
     DOMAIN,

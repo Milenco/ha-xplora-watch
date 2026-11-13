@@ -75,6 +75,12 @@ class Data(DataClassJsonMixin):
     lat: Union[float, None] = None
     lng: Union[float, None] = None
     radius: Union[int, None] = field(default=None, metadata=config(decoder=int_or_none))
+    # Fork: keys of the ARRIVE/LEAVE_SAFE_ZONE feed entries (seen in a real feed on 2026-11-13):
+    # the zone's name and id, and `addr`/`rad` instead of `address`/`radius`.
+    safezone_name: Union[str, None] = None
+    safezone_id: Union[str, None] = field(default=None, metadata=config(decoder=lambda v: None if v is None else str(v)))
+    addr: Union[str, None] = None
+    rad: Union[int, None] = field(default=None, metadata=config(decoder=int_or_none))
     delete_flag: Union[int, None] = 0
 
 

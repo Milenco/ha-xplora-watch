@@ -101,7 +101,7 @@ class PyXploraApi(PyXplora):
         """Reinitialize the instance's connection state, e.g. after an `inter_error`."""
         self.inter_error = None
         # Keep the client type across a reset (`setDevices` resets without passing it).
-        self._client_type = client_type or getattr(self, "_client_type", ClientType.APP.value)
+        self._client_type: str = client_type or str(getattr(self, "_client_type", ClientType.APP.value))
         super().__init__(countrycode, phoneNumber, password, userLang, timeZone, childPhoneNumber, wuid, email)
         self._gql_handler: GQLHandler = GQLHandler(
             self._countrycode,

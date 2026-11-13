@@ -109,15 +109,16 @@ def _build_payload(entry: SimpleChat) -> dict[str, Any]:
     elif entry_type == ChatType.LOW_POWER.value:
         payload.update(battery=data.battery)
     elif entry_type in (ChatType.ARRIVE_SAFE_ZONE.value, ChatType.LEAVE_SAFE_ZONE.value):
-        # Only the `Data` fields the model already parses. Which key carries the safezone's name is
-        # not confirmed from a real feed entry yet (`poi`/`address`/`text` are the candidates);
-        # `notifications_a` debug-logs the raw `data` of these entries so it can be pinned down.
+        # Fork: a real feed entry (2026-11-13) carries the zone's name in `safezone_name` (and
+        # `safezone_id`), the address in `addr` and the radius in `rad`.
         payload.update(
             state="arrive" if entry_type == ChatType.ARRIVE_SAFE_ZONE.value else "leave",
+            zone=data.safezone_name,
+            zone_id=data.safezone_id,
             lat=data.lat,
             lng=data.lng,
-            radius=data.radius,
-            address=data.address,
+            radius=data.radius if data.radius is not None else data.rad,
+            address=data.address or data.addr,
             poi=data.poi,
             text=data.text or data.Text,
             battery=data.battery,

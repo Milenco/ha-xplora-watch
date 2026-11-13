@@ -89,9 +89,8 @@ def async_describe_events(
     @callback
     def describe_safezone(event: LazyEventPartialState) -> dict[str, str]:
         data = event.data
-        # The zone's name field is not pinned down yet (see notifications._build_payload); fall back
-        # through the location labels the entry carries.
-        where = data.get("poi") or data.get("address")
+        # The zone's own name (fork: `zone`, from `safezone_name`), else the location labels.
+        where = data.get("zone") or data.get("poi") or data.get("address")
         verb = "arrived at" if data.get("state") == "arrive" else "left"
         message = f"{verb} {where}" if where else f"{verb} a safe zone"
         return {LOGBOOK_ENTRY_NAME: _watch_name(data), LOGBOOK_ENTRY_MESSAGE: message + _battery_suffix(data)}

@@ -32,6 +32,7 @@ from .const import (
     ATTR_HISTORY_POI,
     ATTR_HISTORY_RAD,
     ATTR_HISTORY_TM,
+    ATTR_IGNORED_FIX,
     ATTR_LAST_UPDATE_STATUS,
     ATTR_LAST_UPDATE_TIME,
     ATTR_LOCATION_HISTORY,
@@ -45,7 +46,6 @@ from .const import (
     ATTR_TRACKER_RAD,
     ATTR_WATCH,
     AUTO_FETCH_HISTORY_HOUR,
-    ATTR_IGNORED_FIX,
     BINARY_SENSOR_SAFEZONE,
     CONF_PHONENUMBER,
     CONF_TIMEZONE,
@@ -207,7 +207,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
         # scheduled poll for the same watch(es) -- await the SAME network fan-out instead of each
         # launching their own. This is the authoritative dedup; the cards' render-time guard is now
         # just a UX nicety on top of it. Keyed entries are removed as soon as the fetch settles.
-        self._inflight_updates: dict[tuple[tuple[str, ...] | None, bool], asyncio.Task[dict[str, Any]]] = {}
+        self._inflight_updates: dict[tuple[tuple[str, ...] | None, bool, bool], asyncio.Task[dict[str, Any]]] = {}
         # Centralized, single-flight token recovery (see `_with_recovery` / `_recover_token`). Every
         # controller call routes through `_with_recovery`, so an expired token is recovered at ONE
         # choke-point. `_token_recovery` is the in-flight recovery task: concurrent callers that hit
@@ -871,7 +871,9 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             watch_entry.update(
                 await self._with_recovery(
-                    lambda: self._init_and_fetch(targets, force_functions, light) if light else self._init_and_fetch(targets, force_functions)
+                    lambda: (
+                        self._init_and_fetch(targets, force_functions, light) if light else self._init_and_fetch(targets, force_functions)
+                    )
                 )
             )
         except RateLimitError as err:
@@ -1321,7 +1323,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
         limit = self._resolved.max_accuracy
         try:
             accuracy = float(self.location_accuracy)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return None
         if not limit or accuracy <= limit or self.lat is None or self.lng is None:
             return None

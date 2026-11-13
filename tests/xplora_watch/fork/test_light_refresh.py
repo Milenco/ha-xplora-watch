@@ -33,7 +33,9 @@ async def test_light_refresh_reads_last_fix_only(
     coordinator_with_data: XploraDataUpdateCoordinator, mock_graphql: aioresponses, graphql_operations: dict[str, Any]
 ) -> None:
     coord = coordinator_with_data
-    graphql_operations["WatchLastLocate"] = {"data": make_watch_last_locate_payload(battery=33, lat="52.2084", lng="7.0006", is_charging=True)}
+    graphql_operations["WatchLastLocate"] = {
+        "data": make_watch_last_locate_payload(battery=33, lat="52.2084", lng="7.0006", is_charging=True)
+    }
     graphql_operations["WatchLastLocate"]["data"]["watchLastLocate"]["tm"] = 1700009999
     before = _operations(mock_graphql)
 
