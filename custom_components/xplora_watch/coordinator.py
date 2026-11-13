@@ -569,7 +569,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
                 return True
         return False
 
-    async def _fetch_watch_entry(self, targets: list[str] | None, force_functions: bool = False) -> dict[str, Any]:
+    async def _fetch_watch_entry(self, targets: list[str] | None, force_functions: bool = False, light: bool = False) -> dict[str, Any]:
         """Resolve the target watch UUIDs and fetch their data via `data_loop`.
 
         Extracted out of `async_update_xplora_data` so the `AuthError` recovery path below
@@ -581,6 +581,8 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
         # Candidate watch ids for the gate decision, resolved without a network call (configured
         # list, else the local login-derived ids); the targets path uses the requested ids.
         candidate = targets or self._configured_wuids
+        if light:
+            return await self._fetch_light(candidate)
         # The coordinator is the single, authoritative decision point for what this poll fetches, so
         # the debug line below matches the real requests. The "functions" data sets (alarms / silent
         # times / safe-zone definitions) are gated *individually* by two rules:
@@ -654,8 +656,25 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
             wuids, opts.message, opts.remove_message, opts.auto_mark_read, include_chats=include_chats, include_history=include_history
         )
 
+    async def _fetch_light(self, wuids: list[str]) -> dict[str, Any]:
+        """Fork: refresh position, battery and charging from the last stored fix, without waking the watch.
+
+        One `WatchLastLocate` request per watch, overlaid on the cached `deviceList` status of the
+        last full update (online status, steps and unread count are carried forward). Only when a
+        watch has no cached status yet (e.g. right after startup failed) is `deviceList` fetched
+        once -- still without `askWatchLocate`. No functions, history, chats or notification feed.
+        """
+        known = getattr(self.controller, "device", {}) or {}
+        if any(wuid not in known for wuid in wuids):
+            await self.controller.setDevices(wuids, functions=frozenset())
+            self._update_is_admin(wuids)
+        opts = self._resolved
+        return await self.data_loop(
+            wuids, opts.message, opts.remove_message, opts.auto_mark_read, include_chats=False, include_history=False, locate=False
+        )
+
     async def async_update_xplora_data(
-        self, targets: list[str] | None = None, new_data: dict | None = None, force_functions: bool = False
+        self, targets: list[str] | None = None, new_data: dict | None = None, force_functions: bool = False, light: bool = False
     ) -> dict[str, Any]:
         """Fetch data from Xplora.
 
@@ -682,13 +701,19 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
         # tuple, or None for "all configured watches") so call order doesn't defeat the match; a
         # force_functions fetch is a different signature (it pulls a different data set), so it is
         # never merged with a plain refresh.
-        key = (tuple(sorted(targets)) if targets else None, force_functions)
+        key = (tuple(sorted(targets)) if targets else None, force_functions, light)
         existing = self._inflight_updates.get(key)
         if existing is not None and not existing.done():
             self._log.debug("Coalescing update onto in-flight request (targets=%s, force_functions=%s)", key[0], force_functions)
             return await existing
 
-        task = self.hass.async_create_task(self._fetch_and_store_xplora_data(targets, force_functions))
+        # `light` is only passed when set, so the two-argument call shape stays as upstream has it.
+        fetch = (
+            self._fetch_and_store_xplora_data(targets, force_functions, light)
+            if light
+            else self._fetch_and_store_xplora_data(targets, force_functions)
+        )
+        task = self.hass.async_create_task(fetch)
         # Retrieve the task's result/exception when it settles so a caller cancelled mid-await (e.g.
         # the coordinator's update timeout firing) doesn't leave an "exception never retrieved".
         task.add_done_callback(lambda t: t.cancelled() or t.exception())
@@ -814,7 +839,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
             return list(self.controller.getWatchUserIDs())
         return []
 
-    async def _init_and_fetch(self, targets: list[str] | None, force_functions: bool) -> dict[str, Any]:
+    async def _init_and_fetch(self, targets: list[str] | None, force_functions: bool, light: bool = False) -> dict[str, Any]:
         """One login-gated network fetch, as a unit routed through `_with_recovery`.
 
         `init(forceLogin=False)` is a cheap no-op once the token is valid (its own
@@ -822,9 +847,9 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
         retry costs nothing -- it just guarantees the fetch always runs against a live session.
         """
         await self.init(aiohttp_client.async_get_clientsession(self.hass))
-        return await self._fetch_watch_entry(targets, force_functions=force_functions)
+        return await self._fetch_watch_entry(targets, force_functions=force_functions, light=light)
 
-    async def _fetch_and_store_xplora_data(self, targets: list[str] | None, force_functions: bool) -> dict[str, Any]:
+    async def _fetch_and_store_xplora_data(self, targets: list[str] | None, force_functions: bool, light: bool = False) -> dict[str, Any]:
         """Perform the actual network fetch and store the result (one run per request signature).
 
         Split out of `async_update_xplora_data` so the coalescer there can share a single run of
@@ -843,7 +868,11 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
         # "Unexpected error" traceback. Order matters: `XploraConnectionError`/`LoginError`
         # subclass `Error`, so they must precede the generic `Error` clause.
         try:
-            watch_entry.update(await self._with_recovery(lambda: self._init_and_fetch(targets, force_functions)))
+            watch_entry.update(
+                await self._with_recovery(
+                    lambda: self._init_and_fetch(targets, force_functions, light) if light else self._init_and_fetch(targets, force_functions)
+                )
+            )
         except RateLimitError as err:
             # Never retry a 429 ourselves -- that's the whole point of RateLimitError bypassing the
             # per-field retry loops; a re-auth inside a rate-limit window worsens a ban.
@@ -863,7 +892,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
             self.data.update(watch_entry)
         # Fold the account-wide notification feed into the plain periodic poll only (not on-demand
         # or per-watch refreshes), so it adds no extra requests beyond the ban-defense cadence.
-        if targets is None and not force_functions:
+        if targets is None and not force_functions and not light:
             await self._process_notifications()
         self.async_set_updated_data(self.data)
         return self.data
@@ -985,6 +1014,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
         auto_mark_read: bool = False,
         include_chats: bool = True,
         include_history: bool = False,
+        locate: bool = True,
     ) -> dict:
         """Fetch and parse Xplora data.
 
@@ -1005,7 +1035,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
             # something else nudges the watch to report. Trigger a pull-to-refresh here and
             # overlay the result onto the deviceList status below. The return tells us whether
             # the watch actually reported (fix advanced) -> the last-update status.
-            responded = await self._refresh_watch_fix(wuid)
+            responded = await self._refresh_watch_fix(wuid, ask=locate)
             if include_chats:
                 res_chats = await self.controller.getWatchChatsRaw(
                     wuid, limit=message_limit, show_del_msg=remove_message, mark_as_read=auto_mark_read
@@ -1052,7 +1082,11 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
             # that reached this point (no UpdateFailed) is a success, and flagging the
             # otherwise-correct update (battery, online status, unread count) with a warning would be
             # misleading. The `last_update` sensor and the cards read this.
-            if self.is_admin.get(wuid, False):
+            if not locate:
+                # Fork: a light refresh never asks the watch, so it says nothing about whether the
+                # watch responds -- keep the verdict of the last real locate request.
+                update_status = (self.data or {}).get(wuid, {}).get(ATTR_LAST_UPDATE_STATUS) or LAST_UPDATE_OK
+            elif self.is_admin.get(wuid, False):
                 update_status = LAST_UPDATE_OK if responded else LAST_UPDATE_NO_RESPONSE
             else:
                 update_status = LAST_UPDATE_OK
@@ -1074,7 +1108,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
             self._log_watch_values(wuid, watch_data[wuid])
         return data
 
-    async def _refresh_watch_fix(self, wuid: str) -> bool:
+    async def _refresh_watch_fix(self, wuid: str, ask: bool = True) -> bool:
         """Force a fresh location fix and overlay it onto `self.device`.
 
         Implements a pull-to-refresh sequence (ref:XW-002): tell the watch to take a new fix
@@ -1103,7 +1137,12 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
         # location" signal (capture 2026-06-25): `deviceList`'s `location.tm` can trail
         # `WatchLastLocate.tm` by ~a day, so the old tm comparison "advanced" every time. `True`
         # means the watch accepted the request and is reachable -> a fresh fix follows.
-        responded = bool(await self.controller.askWatchLocate(wuid))
+        if not ask:
+            # Fork: light refresh -- only read the fix the watch last stored on the server (it
+            # reports on its own, and the guardians' apps may have asked); never wake the watch.
+            responded = False
+        else:
+            responded = bool(await self.controller.askWatchLocate(wuid))
         if debug:
             self._log.debug("fresh-fix ...%s: askWatchLocate -> %s", wuid[25:], responded)
 

@@ -214,6 +214,17 @@ see:
       required: true
       selector: *id001
   name: Track Watch
+refresh_location:
+  description: 'Fork: refresh position, battery and charging from the fix the watch last stored on the
+    Xplora server, without asking the watch for a new one (so it does not wake the watch or cost battery).
+    One request per watch. Use see to ask the watch for a fresh position.'
+  fields:
+    device_id:
+      description: The Xplora® watch(es) this action applies to.
+      name: Watch(es)
+      required: true
+      selector: *id001
+  name: Refresh location (without waking the watch)
 send_message:
   description: Send a notification.
   fields:

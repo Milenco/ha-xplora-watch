@@ -48,6 +48,7 @@ from .const import (
     ATTR_SERVICE_READ_MSG,
     ATTR_SERVICE_REBOOT,
     ATTR_SERVICE_REFRESH_FUNCTIONS,
+    ATTR_SERVICE_REFRESH_LOCATION,
     ATTR_SERVICE_REFRESH_NOTIFICATIONS,
     ATTR_SERVICE_SEE,
     ATTR_SERVICE_SEND_MSG,
@@ -116,6 +117,7 @@ BASE_DELETE_MESSAGE_SERVICE_SCHEMA = _target_schema({vol.Required(ATTR_SERVICE_M
 BASE_READ_MESSAGE_SERVICE_SCHEMA = _target_schema()
 BASE_SEND_MESSAGE_SERVICE_SCHEMA = _target_schema({vol.Required(ATTR_SERVICE_MSG): cv.string})
 BASE_SEE_SERVICE_SCHEMA = _target_schema()
+BASE_REFRESH_LOCATION_SERVICE_SCHEMA = _target_schema()
 # On-demand refresh of alarms/silent-times/safe-zones (the "functions" data that has its own,
 # default-off poll interval).
 BASE_REFRESH_FUNCTIONS_SERVICE_SCHEMA = _target_schema()
@@ -481,6 +483,7 @@ async def async_setup_services(hass: HomeAssistant, entry_id: str) -> None:
     sensor_update_service = XploraMessageSensorUpdateService(hass, entry_id)
     notify_service = XploraMessageService(hass, entry_id)
     see_service = XploraSeeService(hass, entry_id)
+    refresh_location_service = XploraRefreshLocationService(hass, entry_id)
     refresh_functions_service = XploraRefreshFunctionsService(hass, entry_id)
     refresh_notifications_service = XploraRefreshNotificationsService(hass, entry_id)
     fetch_history_service = XploraFetchHistoryService(hass, entry_id)
@@ -489,6 +492,9 @@ async def async_setup_services(hass: HomeAssistant, entry_id: str) -> None:
 
     async def async_see(service: ServiceCall) -> None:
         await see_service.async_see(kwargs=dict(service.data))
+
+    async def async_refresh_location(service: ServiceCall) -> None:
+        await refresh_location_service.async_refresh_location(kwargs=dict(service.data))
 
     async def async_refresh_functions(service: ServiceCall) -> None:
         await refresh_functions_service.async_refresh_functions(kwargs=dict(service.data))
@@ -561,6 +567,9 @@ async def async_setup_services(hass: HomeAssistant, entry_id: str) -> None:
     hass.services.async_register(DOMAIN, ATTR_SERVICE_SEND_MSG, async_send_message, schema=BASE_SEND_MESSAGE_SERVICE_SCHEMA)
     hass.services.async_register(DOMAIN, ATTR_SERVICE_SEE, async_see, schema=BASE_SEE_SERVICE_SCHEMA)
     hass.services.async_register(
+        DOMAIN, ATTR_SERVICE_REFRESH_LOCATION, async_refresh_location, schema=BASE_REFRESH_LOCATION_SERVICE_SCHEMA
+    )
+    hass.services.async_register(
         DOMAIN, ATTR_SERVICE_REFRESH_FUNCTIONS, async_refresh_functions, schema=BASE_REFRESH_FUNCTIONS_SERVICE_SCHEMA
     )
     hass.services.async_register(
@@ -603,6 +612,7 @@ def async_unload_services(hass: HomeAssistant) -> None:
     hass.services.async_remove(DOMAIN, ATTR_SERVICE_READ_MSG)
     hass.services.async_remove(DOMAIN, ATTR_SERVICE_SEND_MSG)
     hass.services.async_remove(DOMAIN, ATTR_SERVICE_SEE)
+    hass.services.async_remove(DOMAIN, ATTR_SERVICE_REFRESH_LOCATION)
     hass.services.async_remove(DOMAIN, ATTR_SERVICE_REFRESH_FUNCTIONS)
     hass.services.async_remove(DOMAIN, ATTR_SERVICE_REFRESH_NOTIFICATIONS)
     hass.services.async_remove(DOMAIN, ATTR_SERVICE_CREATE_ALARM)
@@ -764,6 +774,23 @@ class XploraSeeService(XploraService):
             await account.call("Update", None, lambda: coordinator.async_update_xplora_data(account.wuids), recover=False)
 
         await self._fan_out(data, ATTR_SERVICE_SEE, body)
+
+
+class XploraRefreshLocationService(XploraService):
+    """Fork: refresh position, battery and charging from the last stored fix (does not wake the watch)."""
+
+    async def async_refresh_location(self, **kwargs: Any) -> None:
+        """Read the watch's last stored fix (one request per watch, no askWatchLocate)."""
+        data = kwargs["kwargs"]
+
+        async def body(account: _Account) -> None:
+            coordinator = account.coordinator
+            # `async_update_xplora_data` recovers a stale token internally, so `recover=False`.
+            await account.call(
+                "Refresh location", None, lambda: coordinator.async_update_xplora_data(account.wuids, light=True), recover=False
+            )
+
+        await self._fan_out(data, ATTR_SERVICE_REFRESH_LOCATION, body)
 
 
 class XploraRefreshFunctionsService(XploraService):

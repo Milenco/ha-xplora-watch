@@ -34,6 +34,8 @@ URL_MAPBOX = "https://api.mapbox.com/geocoding/v5/mapbox.places/{},{}.json?types
 API_KEY_MAPBOX: Final = "pk.eyJ1IjoieHBsb3JhdGVjaG5vbG9naWVzIiwiYSI6ImNrenpoYnFodzBhZTUzbG83aTFrNG91aXoifQ.ih4DP1EH9xSrQnzr7QaDvw"
 
 ATTR_SERVICE_SEE: Final = "see"
+# Fork (Milenco): position/battery/charging from the last stored fix, without waking the watch.
+ATTR_SERVICE_REFRESH_LOCATION: Final = "refresh_location"
 ATTR_SERVICE_REFRESH_FUNCTIONS: Final = "refresh_functions"
 ATTR_SERVICE_REFRESH_NOTIFICATIONS: Final = "refresh_notifications"
 # Fetch + cache one past day's location track (default: yesterday). Meant to be automated daily so HA
