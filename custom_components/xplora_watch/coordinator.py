@@ -50,6 +50,7 @@ from .const import (
     CONF_TIMEZONE,
     CONF_USERLANG,
     CONF_WATCHES,
+    CONF_WEB_CLIENT,
     DOMAIN,
     EVENT_CALL,
     LAST_UPDATE_NO_RESPONSE,
@@ -79,7 +80,7 @@ from .pyxplora_api.exception_classes import AuthError, Error, LoginError, RateLi
 from .pyxplora_api.exception_classes import ConnectionError as XploraConnectionError
 from .pyxplora_api.model import ChatsNew
 from .pyxplora_api.pyxplora_api_async import PyXploraApi, TokenRefreshOutcome
-from .pyxplora_api.status import LocationType, WatchOnlineStatus
+from .pyxplora_api.status import ClientType, LocationType, WatchOnlineStatus
 
 # Return type of a controller-call factory routed through `_with_recovery`.
 _T = TypeVar("_T")
@@ -264,6 +265,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
             wuid=options.get(CONF_WATCHES),
             email=data.get(CONF_EMAIL),
             session=session,
+            client_type=ClientType.WEB.value if data.get(CONF_WEB_CLIENT) else ClientType.APP.value,
         )
         await self._restore_session()
         await self._restore_functions_fetch()

@@ -13,7 +13,7 @@ import hashlib
 import math
 from time import time
 
-from .const import API_KEY, API_SECRET, DEFAULT_ACCEPT_LANGUAGE
+from .const import API_KEY, API_SECRET, DEFAULT_ACCEPT_LANGUAGE, WEB_API_KEY, WEB_API_SECRET, WEB_ORIGIN
 from .status import ClientType
 
 
@@ -58,6 +58,7 @@ class HandlerGQL:
         timeZone: str,
         email: str | None = None,
         signup: bool = True,
+        clientType: str = ClientType.APP.value,
     ) -> None:
         """Initializes the class with the given parameters.
 
@@ -69,6 +70,9 @@ class HandlerGQL:
             timeZone (str): The time zone.
             email (str, optional): The email address. Defaults to None.
             signup (bool, optional): Indicates if the user is signing up. Defaults to True.
+            clientType (str, optional): `APP` (like the phone app, the default) or `WEB` (like
+                goplay.myxplora.com). Xplora allows one session per client type, so `WEB` keeps
+                the guardian's phone app logged in.
         """
         # init vars
         self.accessToken = None
@@ -78,12 +82,18 @@ class HandlerGQL:
         self.errors = []
         self.userLocale = userLang
         self.timeZone = timeZone
+        self.clientType = ClientType.WEB.value if clientType == ClientType.WEB.value else ClientType.APP.value
+        if self.is_web_client:
+            # The web client sends the country code without `+` and the number without spaces
+            # (tested 2026-11-13 with `31` + the national number).
+            countryPhoneNumber = "".join(ch for ch in countryPhoneNumber or "" if ch.isdigit())
+            phoneNumber = "".join(ch for ch in phoneNumber or "" if ch.isdigit())
         self.countryPhoneNumber = countryPhoneNumber
         self.phoneNumber = phoneNumber
         self.email = email
         self.passwordMD5 = hashlib.md5(password.encode()).hexdigest()
-        self._API_KEY = API_KEY
-        self._API_SECRET = API_SECRET
+        self._API_KEY = WEB_API_KEY if self.is_web_client else API_KEY
+        self._API_SECRET = WEB_API_SECRET if self.is_web_client else API_SECRET
         self.variables = {
             "countryPhoneNumber": self.countryPhoneNumber,
             "phoneNumber": self.phoneNumber,
@@ -91,13 +101,18 @@ class HandlerGQL:
             "userLang": self.userLocale,
             "timeZone": self.timeZone,
             "emailAddress": self.email,
-            "client": ClientType.APP.value,
+            "client": self.clientType,
             # `signInWithEmailOrPhone` declares a `$clientId: String`; sent (null here -- this
             # client registers no push/device id) so the login request carries the same variable
             # set as the reference client (ref:XW-014).
             "clientId": None,
         }
         self.signup = signup
+
+    @property
+    def is_web_client(self) -> bool:
+        """Whether this handler logs in and signs requests as Xplora's web client."""
+        return getattr(self, "clientType", ClientType.APP.value) == ClientType.WEB.value
 
     def getApiKey(self) -> str:
         """Returns the API key.
@@ -136,7 +151,7 @@ class HandlerGQL:
 
         authorizationHeader = ""
 
-        if (self.accessToken is None or not self.issueToken) and self._API_KEY == API_KEY:
+        if (self.accessToken is None or not self.issueToken) and self._API_KEY in (API_KEY, WEB_API_KEY):
             # OPEN authorization
             authorizationHeader = f"Open {self._API_KEY}:{self._API_SECRET}"
         # else:
@@ -161,4 +176,7 @@ class HandlerGQL:
             "H-BackDoor-Authorization": authorizationHeader,
             "Accept-Language": _normalize_accept_language(self.userLocale),
         }
+        if self.is_web_client:
+            # Same origin as goplay.myxplora.com, as in the tested web-client requests.
+            requestHeaders["Origin"] = WEB_ORIGIN
         return requestHeaders

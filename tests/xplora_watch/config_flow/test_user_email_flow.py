@@ -60,7 +60,8 @@ async def test_user_email_happy_path_creates_entry_with_alias(hass, mock_graphql
     # UI instead of every entry reading "Xplora®".
     assert result["title"] == "Dad"
     # The credentials AND the submitted alias are stored in the entry's data.
-    assert result["data"] == {**EMAIL_USER_INPUT, CONF_ACCOUNT_ALIAS: "Dad"}
+    # Fork: the login form defaults to the web client (stored as `web_client: True`).
+    assert result["data"] == {**EMAIL_USER_INPUT, CONF_ACCOUNT_ALIAS: "Dad", "web_client": True}
 
 
 async def test_user_email_invalid_email_shows_error(hass, mock_graphql, graphql_operations) -> None:

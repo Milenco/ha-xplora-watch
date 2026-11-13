@@ -5,6 +5,7 @@ from __future__ import annotations
 import voluptuous as vol
 from homeassistant.const import CONF_COUNTRY_CODE, CONF_EMAIL, CONF_LANGUAGE, CONF_PASSWORD
 from homeassistant.helpers.selector import (
+    BooleanSelector,
     SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
@@ -14,7 +15,7 @@ from homeassistant.helpers.selector import (
     TextSelectorType,
 )
 
-from .const import CONF_PHONENUMBER, CONF_TIMEZONE, CONF_USERLANG, DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, XPLORA_USER_LANGS
+from .const import CONF_PHONENUMBER, CONF_TIMEZONE, CONF_WEB_CLIENT, CONF_USERLANG, DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, XPLORA_USER_LANGS
 
 DEFAULT_DATA_SCHEMA = {
     vol.Required(CONF_PASSWORD): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
@@ -47,6 +48,7 @@ DEFAULT_DATA_SCHEMA = {
             mode=SelectSelectorMode.DROPDOWN,
         )
     ),
+    vol.Required(CONF_WEB_CLIENT, default=True): BooleanSelector(),
 }
 
 DATA_SCHEMA_PHONE = {

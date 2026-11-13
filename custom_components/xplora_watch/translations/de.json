@@ -52,10 +52,14 @@
           "language": "Sprache",
           "password": "Passwort",
           "timezone": "Zeitzone",
-          "userlang": "Benutzersprache (de) der Uhr"
+          "userlang": "Benutzersprache (de) der Uhr",
+          "web_client": "Als Web-Client anmelden (Xplora-App bleibt angemeldet)"
         },
         "description": "Kontoauthentifizierung",
-        "title": "HA Xplora® Watch einrichten"
+        "title": "HA Xplora® Watch einrichten",
+        "data_description": {
+          "web_client": "Empfohlen. Xplora erlaubt eine Sitzung pro Client-Typ: Der Web-Client (wie goplay.myxplora.com) läuft neben der App, Home Assistant meldet die App also nicht mehr ab."
+        }
       },
       "user_phone": {
         "data": {
@@ -64,10 +68,14 @@
           "password": "Passwort",
           "phonenumber": "Telefonnummer ohne Ländercode",
           "timezone": "Zeitzone",
-          "userlang": "Benutzersprache (de) der Uhr"
+          "userlang": "Benutzersprache (de) der Uhr",
+          "web_client": "Als Web-Client anmelden (Xplora-App bleibt angemeldet)"
         },
         "description": "Kontoauthentifizierung",
-        "title": "HA Xplora® Watch einrichten"
+        "title": "HA Xplora® Watch einrichten",
+        "data_description": {
+          "web_client": "Empfohlen. Xplora erlaubt eine Sitzung pro Client-Typ: Der Web-Client (wie goplay.myxplora.com) läuft neben der App, Home Assistant meldet die App also nicht mehr ab."
+        }
       },
       "alias": {
         "data": {

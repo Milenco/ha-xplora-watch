@@ -16,6 +16,12 @@ def _deobfuscate(encoded: str) -> str:
 
 API_KEY = _deobfuscate("QUgKDkZQTxRURABQGQddCUxARxdSSUFHDQoWB0hGAhI=")
 API_SECRET = _deobfuscate("ThRdXUsCG0JXEQVeGQAJXxYWFxZSEUtHXA0QBB1BWRA=")
+# Fork (Milenco): the bootstrap key/secret of Xplora's own web client (goplay.myxplora.com). A
+# login with `client: WEB` gets its own session next to the phone app's `APP` session, so the
+# integration no longer logs the guardian's phone app out (tested 2026-11-13).
+WEB_API_KEY = _deobfuscate("TkMKDkMFHEdTTFpfHFMKDkxDFkdYSUoWVF9KURlEA0Y=")
+WEB_API_SECRET = _deobfuscate("SkcJC0VXGkdSQ1pdHFMKDhZHFUIHQ05HClcXAxxEUEY=")
+WEB_ORIGIN = "https://goplay.myxplora.com"
 ENDPOINT = "https://api.prod.myxplora.com/api/"
 DEFAULT_TIMEOUT = 60
 DEFAULT_USER_AGENT = "okhttp/5.3.2"

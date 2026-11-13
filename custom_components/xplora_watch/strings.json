@@ -53,10 +53,14 @@
           "language": "Language",
           "password": "Password",
           "timezone": "Timezone",
-          "userlang": "Watch Language (en)"
+          "userlang": "Watch Language (en)",
+          "web_client": "Log in as web client (keeps the Xplora phone app logged in)"
         },
         "description": "Account Authentication",
-        "title": "Set up HA Xplora® Watch"
+        "title": "Set up HA Xplora® Watch",
+        "data_description": {
+          "web_client": "Recommended. Xplora allows one session per client type: the web client (like goplay.myxplora.com) runs next to the phone app, so Home Assistant no longer logs your phone app out. Turn off to log in as the app, as before."
+        }
       },
       "user_phone": {
         "data": {
@@ -65,10 +69,14 @@
           "password": "Password",
           "phonenumber": "phonenumber without Countrycode",
           "timezone": "Timezone",
-          "userlang": "Watch Language (en)"
+          "userlang": "Watch Language (en)",
+          "web_client": "Log in as web client (keeps the Xplora phone app logged in)"
         },
         "description": "Account Authentication",
-        "title": "Set up HA Xplora® Watch"
+        "title": "Set up HA Xplora® Watch",
+        "data_description": {
+          "web_client": "Recommended. Xplora allows one session per client type: the web client (like goplay.myxplora.com) runs next to the phone app, so Home Assistant no longer logs your phone app out. Turn off to log in as the app, as before."
+        }
       },
       "alias": {
         "data": {

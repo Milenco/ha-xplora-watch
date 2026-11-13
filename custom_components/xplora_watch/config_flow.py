@@ -66,6 +66,7 @@ from .const import (
     CONF_TIMEZONE,
     CONF_USERLANG,
     CONF_WATCHES,
+    CONF_WEB_CLIENT,
     DEFAULT_AUTO_FETCH_HISTORY,
     DEFAULT_HISTORY_RETENTION_DAYS,
     DEFAULT_LANGUAGE,
@@ -91,9 +92,14 @@ from .demo import make_controller
 from .helper import watch_user_label
 from .pyxplora_api.exception_classes import AuthError, Error, LoginError, PhoneOrEmailFail, RateLimitError
 from .pyxplora_api.pyxplora_api_async import PyXploraApi
-from .pyxplora_api.status import UserContactType
+from .pyxplora_api.status import ClientType, UserContactType
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def client_type_for(data: dict[str, Any] | MappingProxyType[str, Any]) -> str:
+    """`WEB` when the entry logs in as Xplora's web client (fork option), else `APP` (upstream)."""
+    return ClientType.WEB.value if data.get(CONF_WEB_CLIENT) else ClientType.APP.value
 
 
 @callback
@@ -107,6 +113,7 @@ async def sign_in(hass: core.HomeAssistant, data: dict[str, Any] | MappingProxyT
         timeZone=data.get(CONF_TIMEZONE) or "",
         email=data.get(CONF_EMAIL, None),
         session=aiohttp_client.async_get_clientsession(hass),
+        client_type=client_type_for(data),
     )
     await controller.init()
     return controller
@@ -125,6 +132,7 @@ async def validate_input(hass: core.HomeAssistant, data: dict[str, Any]) -> dict
         session=aiohttp_client.async_create_clientsession(hass),
         email=data.get(CONF_EMAIL),
         phoneNumber=data.get(CONF_PHONENUMBER) or "",
+        client_type=client_type_for(data),
     )
     if not await account.checkEmailOrPhoneExist(
         UserContactType.EMAIL if data.get(CONF_EMAIL) else UserContactType.PHONE,

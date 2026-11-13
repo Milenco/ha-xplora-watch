@@ -14,7 +14,7 @@ from .exception_classes import AUTH_TOKEN_EXPIRED_CODE, AuthError, HandlerExcept
 from .graphql_client import GraphqlClient
 from .handler_gql import HandlerGQL
 from .model import Chats, ChatsNew, Notifications
-from .status import ChatType, EmailAndPhoneVerificationTypeV2, NormalStatus, UserContactType
+from .status import ChatType, ClientType, EmailAndPhoneVerificationTypeV2, NormalStatus, UserContactType
 from .watch_commands import WatchCommand
 
 _LOGGER = logging.getLogger(__name__)
@@ -53,10 +53,11 @@ class GQLHandler(HandlerGQL):
         email: str | None = None,
         signup: bool = True,
         session: aiohttp.ClientSession | None = None,
+        clientType: str = ClientType.APP.value,
     ) -> None:
         self._session = session
         self.refreshToken = None
-        super().__init__(countryPhoneNumber, phoneNumber, password, userLang, timeZone, email, signup)
+        super().__init__(countryPhoneNumber, phoneNumber, password, userLang, timeZone, email, signup, clientType)
 
     async def runGqlQuery_a(
         self,

@@ -19,6 +19,7 @@ from .gql_handler_async import GQLHandler
 from .model import Chats, ChatsNew, Data, Notifications, SimpleChat, SmallChat, SmallChatList, User
 from .pyxplora import PyXplora
 from .status import (
+    ClientType,
     Emoji,
     LocationType,
     NormalStatus,
@@ -79,8 +80,9 @@ class PyXploraApi(PyXplora):
         email: str | None = None,
         sign_up: bool = True,
         session: aiohttp.ClientSession | None = None,
+        client_type: str = ClientType.APP.value,
     ) -> None:
-        self._reset(countrycode, phoneNumber, password, userLang, timeZone, childPhoneNumber, wuid, email, sign_up, session)
+        self._reset(countrycode, phoneNumber, password, userLang, timeZone, childPhoneNumber, wuid, email, sign_up, session, client_type)
 
     def _reset(
         self,
@@ -94,12 +96,23 @@ class PyXploraApi(PyXplora):
         email: str | None = None,
         sign_up: bool = True,
         session: aiohttp.ClientSession | None = None,
+        client_type: str | None = None,
     ) -> None:
         """Reinitialize the instance's connection state, e.g. after an `inter_error`."""
         self.inter_error = None
+        # Keep the client type across a reset (`setDevices` resets without passing it).
+        self._client_type = client_type or getattr(self, "_client_type", ClientType.APP.value)
         super().__init__(countrycode, phoneNumber, password, userLang, timeZone, childPhoneNumber, wuid, email)
         self._gql_handler: GQLHandler = GQLHandler(
-            self._countrycode, self._phoneNumber, self._password, self._userLang, self._timeZone, self._email, sign_up, session
+            self._countrycode,
+            self._phoneNumber,
+            self._password,
+            self._userLang,
+            self._timeZone,
+            self._email,
+            sign_up,
+            session,
+            self._client_type,
         )
 
     async def _login(

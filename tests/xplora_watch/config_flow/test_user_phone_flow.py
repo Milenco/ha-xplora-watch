@@ -59,7 +59,8 @@ async def test_user_phone_happy_path_creates_entry_with_alias(hass, mock_graphql
     # The entry title is the user-chosen alias, so multiple accounts are distinguishable in the
     # UI instead of every entry reading "Xplora®".
     assert result["title"] == "Mom"
-    assert result["data"] == {**PHONE_USER_INPUT, CONF_ACCOUNT_ALIAS: "Mom"}
+    # Fork: the login form defaults to the web client (stored as `web_client: True`).
+    assert result["data"] == {**PHONE_USER_INPUT, CONF_ACCOUNT_ALIAS: "Mom", "web_client": True}
 
 
 async def test_user_phone_invalid_phone_shows_error(hass, mock_graphql, graphql_operations) -> None:

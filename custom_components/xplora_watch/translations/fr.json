@@ -52,10 +52,14 @@
           "language": "Langue",
           "password": "Mot de passe",
           "timezone": "Fuseau horaire",
-          "userlang": "Langue de la montre (fr)"
+          "userlang": "Langue de la montre (fr)",
+          "web_client": "Se connecter comme client web (l'app Xplora reste connectée)"
         },
         "description": "Authentification du compte",
-        "title": "Configurer HA Xplora® Watch"
+        "title": "Configurer HA Xplora® Watch",
+        "data_description": {
+          "web_client": "Recommandé. Xplora autorise une session par type de client : le client web (comme goplay.myxplora.com) fonctionne à côté de l'app, Home Assistant ne déconnecte donc plus l'app."
+        }
       },
       "user_phone": {
         "data": {
@@ -64,10 +68,14 @@
           "password": "Mot de passe",
           "phonenumber": "numéro de téléphone sans le code du pays",
           "timezone": "Fuseau horaire",
-          "userlang": "Langue de la montre (fr)"
+          "userlang": "Langue de la montre (fr)",
+          "web_client": "Se connecter comme client web (l'app Xplora reste connectée)"
         },
         "description": "Authentification du compte",
-        "title": "Configurer HA Xplora® Watch"
+        "title": "Configurer HA Xplora® Watch",
+        "data_description": {
+          "web_client": "Recommandé. Xplora autorise une session par type de client : le client web (comme goplay.myxplora.com) fonctionne à côté de l'app, Home Assistant ne déconnecte donc plus l'app."
+        }
       },
       "alias": {
         "data": {

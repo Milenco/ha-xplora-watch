@@ -127,6 +127,9 @@ CONF_MAPS: Final = "maps"
 CONF_MESSAGE: Final = "message"
 CONF_OPENCAGE_APIKEY: Final = "opencage_apikey"
 CONF_PHONENUMBER: Final = "phonenumber"
+# Fork (Milenco): log in as Xplora's web client (`WEB`) instead of the app (`APP`), so the
+# guardian's phone app stays logged in (Xplora allows one session per client type).
+CONF_WEB_CLIENT: Final = "web_client"
 CONF_REMOVE_MESSAGE: Final = "remove_message"
 # Separate, optional poll cadence for the slow-changing "functions" data (alarms, silent
 # times, safe-zone definitions). These need their own per-watch queries (`deviceList` cannot
