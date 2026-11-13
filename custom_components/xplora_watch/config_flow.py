@@ -46,6 +46,8 @@ from .const import (
     CONF_AUTO_FETCH_HISTORY,
     CONF_AUTO_MARK_READ,
     CONF_HISTORY_RETENTION_DAYS,
+    CONF_MAX_ACCURACY,
+    MAX_ACCURACY_LIMIT,
     CONF_HOME_LATITUDE,
     CONF_HOME_LONGITUDE,
     CONF_HOME_RADIUS,
@@ -384,6 +386,10 @@ class XploraOptionsFlowHandler(OptionsFlowWithConfigEntry):
                 vol.Required(CONF_HOME_LATITUDE, default=_options.get(CONF_HOME_LATITUDE, _home_zone[ATTR_LATITUDE])): cv.latitude,
                 vol.Required(CONF_HOME_LONGITUDE, default=_options.get(CONF_HOME_LONGITUDE, _home_zone[ATTR_LONGITUDE])): cv.longitude,
                 vol.Required(CONF_HOME_RADIUS, default=_options.get(CONF_HOME_RADIUS, _home_zone[CONF_RADIUS])): cv.positive_int,
+                # Fork: ignore cell-tower fixes for the tracker (metres, 0 = off).
+                vol.Required(CONF_MAX_ACCURACY, default=_options.get(CONF_MAX_ACCURACY, 0)): NumberSelector(
+                    NumberSelectorConfig(min=0, max=MAX_ACCURACY_LIMIT, step=50, mode=NumberSelectorMode.BOX, unit_of_measurement="m"),
+                ),
                 vol.Required(CONF_MESSAGE, default=_options.get(CONF_MESSAGE, 10)): NumberSelector(
                     NumberSelectorConfig(
                         min=0,

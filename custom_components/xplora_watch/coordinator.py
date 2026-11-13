@@ -45,6 +45,7 @@ from .const import (
     ATTR_TRACKER_RAD,
     ATTR_WATCH,
     AUTO_FETCH_HISTORY_HOUR,
+    ATTR_IGNORED_FIX,
     BINARY_SENSOR_SAFEZONE,
     CONF_PHONENUMBER,
     CONF_TIMEZONE,
@@ -1054,6 +1055,8 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
             self.battery = self.device.get("watch_battery", -1)
             self.is_charging = self.device.get("watch_charging", False)
             self.get_location()
+            # Fork: keep an inaccurate (cell-tower) fix from moving the tracker.
+            ignored_fix = self._apply_accuracy_filter(wuid)
 
             # NOTE: `is_safezone` is intentionally INVERTED relative to its name -- it feeds a
             # binary_sensor with device_class SAFETY, where `on` means "problem/unsafe". So
@@ -1075,6 +1078,7 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
             if include_history:
                 await self._fetch_loc_history(wuid)
             watch_data = self.get_data(wuid, chats)
+            watch_data[wuid][ATTR_IGNORED_FIX] = ignored_fix
             # Record the per-watch update outcome. A primary guardian drives location tracking, so
             # the watch accepting the locate request (ok) vs. being off / out of reach (no_response)
             # is a real signal worth surfacing. A secondary guardian frequently cannot trigger a
@@ -1304,6 +1308,34 @@ class XploraDataUpdateCoordinator(DataUpdateCoordinator):
 
         self._step_day = device.get("getWatchUserSteps", {}).get("day")
         self._xcoin = device.get("getWatchUserXCoins", 0)
+
+    def _apply_accuracy_filter(self, wuid: str) -> dict[str, Any] | None:
+        """Fork: fall back to the previous position when this fix is less accurate than allowed.
+
+        A cell-tower (LBS) fix can be off by a kilometre or more; as a GPS tracker it would put the
+        child in the wrong zone (or at home). With `max_accuracy` set, such a fix keeps the
+        previous position, accuracy, type and fix time on the tracker and is reported in the
+        `ignored_fix` attribute instead. Battery, charging and the watch's own safe-zone report
+        are not affected. Returns the ignored fix, or None when nothing was ignored.
+        """
+        limit = self._resolved.max_accuracy
+        try:
+            accuracy = float(self.location_accuracy)
+        except (TypeError, ValueError):
+            return None
+        if not limit or accuracy <= limit or self.lat is None or self.lng is None:
+            return None
+        ignored = {"accuracy": self.location_accuracy, "locate_type": self.locate_type, "fix_time": self.last_track_time}
+        previous = (self.data or {}).get(wuid) or {}
+        if previous.get(ATTR_TRACKER_LAT) is None or previous.get(ATTR_TRACKER_LNG) is None:
+            return ignored  # nothing better to show: keep this fix, but flag it
+        self.lat = previous[ATTR_TRACKER_LAT]
+        self.lng = previous[ATTR_TRACKER_LNG]
+        self.location_accuracy = previous.get("location_accuracy", -1)
+        self.locate_type = previous.get("locateType", self.locate_type)
+        self.last_track_time = previous.get("lastTrackTime")
+        self.poi = previous.get(ATTR_TRACKER_POI)
+        return ignored
 
     def get_location(self) -> None:
         """Get location information from device.

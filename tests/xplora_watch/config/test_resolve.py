@@ -40,6 +40,7 @@ def test_resolve_empty_returns_defaults() -> None:
         history_retention_days=DEFAULT_HISTORY_RETENTION_DAYS,
         home_is_safezone=STATE_OFF,
         maps=MAPS[0],
+        max_accuracy=0,  # fork option, off by default
         message=10,
         notify_call=False,
         notify_sos=True,

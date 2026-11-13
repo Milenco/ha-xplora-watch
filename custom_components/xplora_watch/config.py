@@ -37,6 +37,7 @@ from .const import (
     CONF_AUTO_FETCH_HISTORY,
     CONF_AUTO_MARK_READ,
     CONF_HISTORY_RETENTION_DAYS,
+    CONF_MAX_ACCURACY,
     CONF_HOME_SAFEZONE,
     CONF_MAPS,
     CONF_MESSAGE,
@@ -83,6 +84,7 @@ class ConfKeys(StrEnum):
     AUTO_FETCH_HISTORY = CONF_AUTO_FETCH_HISTORY
     AUTO_MARK_READ = CONF_AUTO_MARK_READ
     HISTORY_RETENTION_DAYS = CONF_HISTORY_RETENTION_DAYS
+    MAX_ACCURACY = CONF_MAX_ACCURACY
     HOME_IS_SAFEZONE = CONF_HOME_SAFEZONE
     MAPS = CONF_MAPS
     MESSAGE = CONF_MESSAGE
@@ -142,6 +144,8 @@ CONF_SPECS: dict[ConfKeys, _ConfSpec[Any]] = {
     ConfKeys.HISTORY_RETENTION_DAYS: _ConfSpec(default=DEFAULT_HISTORY_RETENTION_DAYS, converter=normalize_history_retention_days),
     ConfKeys.HOME_IS_SAFEZONE: _ConfSpec(default=STATE_OFF, converter=_Converters.to_str),
     ConfKeys.MAPS: _ConfSpec(default=MAPS[0], converter=_Converters.to_str),
+    # Fork: 0 = off; negative values are treated as off.
+    ConfKeys.MAX_ACCURACY: _ConfSpec(default=0, converter=lambda v: max(0, int(v))),
     ConfKeys.MESSAGE: _ConfSpec(default=10, converter=_Converters.to_int),
     # Per-category notification toggles. SOS defaults ON (the one safety category a polling user
     # should get without discovering a setting); calls/power/low-battery/safe-zone default OFF (ADR 0016).
@@ -172,6 +176,7 @@ class ResolvedOptions:
     history_retention_days: int
     home_is_safezone: str
     maps: str
+    max_accuracy: int
     message: int
     notify_call: bool
     notify_sos: bool

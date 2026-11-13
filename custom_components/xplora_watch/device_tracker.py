@@ -26,6 +26,7 @@ from .const import (
     ATTR_TRACKER_POI,
     ATTR_TRACKER_RAD,
     ATTR_TRACKER_SAFEZONE_NAME,
+    ATTR_IGNORED_FIX,
     ATTR_WATCH,
     CONF_WATCHES,
     DOMAIN,
@@ -244,5 +245,7 @@ class XploraDeviceTracker(XploraBaseEntity, TrackerEntity):
                 ATTR_TRACKER_IMEI: self.coordinator.data[self.watch_uid].get(ATTR_TRACKER_IMEI, None),
                 ATTR_TRACKER_POI: self.coordinator.data[self.watch_uid].get(ATTR_TRACKER_POI, None),
                 ATTR_TRACKER_LICENCE: self.coordinator.data[self.watch_uid].get(ATTR_TRACKER_LICENCE, None),
+                # Fork: the last fix that was too inaccurate to move the tracker (see max_accuracy).
+                ATTR_IGNORED_FIX: self.coordinator.data[self.watch_uid].get(ATTR_IGNORED_FIX),
             },
         )

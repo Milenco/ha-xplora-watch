@@ -290,6 +290,11 @@ ATTR_HISTORY_CITY: Final = "city"
 # User-configurable in the options flow (`CONF_HISTORY_RETENTION_DAYS`); genuinely stores more
 # than the app's ~3-day window.
 CONF_HISTORY_RETENTION_DAYS: Final = "history_retention_days"
+# Fork (Milenco): fixes less accurate than this many metres (cell-tower/LBS) do not move the tracker;
+# 0 = off (upstream behaviour).
+CONF_MAX_ACCURACY: Final = "max_accuracy"
+MAX_ACCURACY_LIMIT: Final = 10000
+ATTR_IGNORED_FIX: Final = "ignored_fix"
 DEFAULT_HISTORY_RETENTION_DAYS: Final = 14
 HISTORY_RETENTION_DAYS_MIN: Final = 1
 HISTORY_RETENTION_DAYS_MAX: Final = 90
