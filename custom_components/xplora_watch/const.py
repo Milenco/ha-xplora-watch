@@ -295,6 +295,10 @@ CONF_HISTORY_RETENTION_DAYS: Final = "history_retention_days"
 CONF_MAX_ACCURACY: Final = "max_accuracy"
 MAX_ACCURACY_LIMIT: Final = 10000
 ATTR_IGNORED_FIX: Final = "ignored_fix"
+# Fork (Milenco): keep downloaded chat media (voice/photo/video under www/, served without login)
+# only this many hours, and do not fetch media of older messages; 0 = keep forever (upstream).
+CONF_MEDIA_RETENTION_HOURS: Final = "media_retention_hours"
+MEDIA_RETENTION_HOURS_MAX: Final = 8760
 DEFAULT_HISTORY_RETENTION_DAYS: Final = 14
 HISTORY_RETENTION_DAYS_MIN: Final = 1
 HISTORY_RETENTION_DAYS_MAX: Final = 90

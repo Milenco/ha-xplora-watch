@@ -121,7 +121,8 @@
           "scan_interval_functions": "Intervalo de actualización de funciones (alarmas, tiempos de silencio, zonas seguras)",
           "watches": "Relojes",
           "account_alias": "Alias de la cuenta",
-          "max_accuracy": "Ignorar posiciones menos precisas que (m, 0 = no)"
+          "max_accuracy": "Ignorar posiciones menos precisas que (m, 0 = no)",
+          "media_retention_hours": "Conservar multimedia del chat (horas, 0 = siempre)"
         },
         "data_description": {
           "history_retention_days": "Cuánto tiempo conserva el sensor opcional de historial de ubicaciones las posiciones pasadas. Home Assistant retiene mucho más que la ventana de ~3 días de la app Xplora®. Solo importa una vez que actives el sensor de historial de ubicaciones.",
@@ -135,7 +136,8 @@
           "notify_low_power": "Dispara un evento de Home Assistant y escribe una línea en el registro cuando el reloj informa de batería baja. Desactivado de forma predeterminada. Solo se dispara mientras el sondeo está activo.",
           "notify_safezone": "Dispara un evento de Home Assistant y escribe una línea en el registro cuando el reloj informa de que entra o sale de una de sus zonas seguras. Desactivado de forma predeterminada. Solo se dispara mientras el sondeo está activo. El evento y la línea del registro guardan la ubicación informada en la base de datos del recorder de Home Assistant.",
           "account_alias": "Renombra el dispositivo del reloj de esta cuenta en la próxima recarga (p. ej. «Dana Watch (Mamá)»). Los identificadores de entidad existentes conservan su nombre original, por lo que las automatizaciones y los paneles que los referencian siguen funcionando.",
-          "max_accuracy": "Las posiciones por antena (LBS) pueden desviarse un kilómetro o más. Las menos precisas mantienen la posición anterior en el rastreador (atributo ignored_fix). 0 mantiene todas."
+          "max_accuracy": "Las posiciones por antena (LBS) pueden desviarse un kilómetro o más. Las menos precisas mantienen la posición anterior en el rastreador (atributo ignored_fix). 0 mantiene todas.",
+          "media_retention_hours": "Los mensajes de voz, fotos y vídeos se guardan en config/www y se pueden abrir sin iniciar sesión si se conoce el nombre del archivo. Con un valor mayor que 0 se borran los archivos antiguos y no se vuelven a descargar."
         },
         "title": "configuraciones adicionales para HA Xplora® Watch"
       }

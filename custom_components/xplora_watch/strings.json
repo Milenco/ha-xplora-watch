@@ -122,7 +122,8 @@
           "scan_interval": "Update interval (Off disables polling)",
           "scan_interval_functions": "Functions update interval (alarms, silent times, safe zones)",
           "watches": "Watches",
-          "max_accuracy": "Ignore fixes less accurate than (m, 0 = off)"
+          "max_accuracy": "Ignore fixes less accurate than (m, 0 = off)",
+          "media_retention_hours": "Keep chat media for (hours, 0 = forever)"
         },
         "data_description": {
           "account_alias": "Renames this account's watch device (e.g. “Dana Watch (Mom)”) on the next reload. Existing entity ids keep their original name, so automations and dashboards that reference them keep working.",
@@ -136,7 +137,8 @@
           "notify_power": "Fire a Home Assistant event, and write a logbook line, when the watch powers on or off. Off by default. Only fires while polling is on.",
           "notify_low_power": "Fire a Home Assistant event, and write a logbook line, when the watch reports low battery. Off by default. Only fires while polling is on.",
           "notify_safezone": "Fire a Home Assistant event, and write a logbook line, when the watch reports arriving at or leaving one of its safe zones. Off by default. Only fires while polling is on. The event and logbook line carry the reported location into the Home Assistant recorder database.",
-          "max_accuracy": "Cell-tower (LBS) fixes can be off by a kilometre or more. Fixes less accurate than this keep the previous position on the tracker (shown in the ignored_fix attribute). Battery and charging still update. 0 keeps every fix."
+          "max_accuracy": "Cell-tower (LBS) fixes can be off by a kilometre or more. Fixes less accurate than this keep the previous position on the tracker (shown in the ignored_fix attribute). Battery and charging still update. 0 keeps every fix.",
+          "media_retention_hours": "Voice messages, photos and videos are stored under config/www and can be opened without logging in by anyone who knows the file name. With a value above 0, older files are deleted and media of older messages is not downloaded again (the chat shows them as unavailable)."
         },
         "title": "further settings for HA Xplora® Watch"
       }

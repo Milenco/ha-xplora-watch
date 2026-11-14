@@ -52,6 +52,7 @@ from .const import (
     CONF_HOME_SAFEZONE,
     CONF_MAPS,
     CONF_MAX_ACCURACY,
+    CONF_MEDIA_RETENTION_HOURS,
     CONF_MESSAGE,
     CONF_NOTIFY_CALL,
     CONF_NOTIFY_LOW_POWER,
@@ -81,6 +82,7 @@ from .const import (
     HOME_SAFEZONE,
     MAPS,
     MAX_ACCURACY_LIMIT,
+    MEDIA_RETENTION_HOURS_MAX,
     SCAN_INTERVAL_FUNCTIONS_OPTIONS,
     SCAN_INTERVAL_OPTIONS,
     SIGNIN,
@@ -389,6 +391,12 @@ class XploraOptionsFlowHandler(OptionsFlowWithConfigEntry):
                 # Fork: ignore cell-tower fixes for the tracker (metres, 0 = off).
                 vol.Required(CONF_MAX_ACCURACY, default=_options.get(CONF_MAX_ACCURACY, 0)): NumberSelector(
                     NumberSelectorConfig(min=0, max=MAX_ACCURACY_LIMIT, step=50, mode=NumberSelectorMode.BOX, unit_of_measurement="m"),
+                ),
+                # Fork: hours to keep downloaded chat media (0 = forever).
+                vol.Required(CONF_MEDIA_RETENTION_HOURS, default=_options.get(CONF_MEDIA_RETENTION_HOURS, 0)): NumberSelector(
+                    NumberSelectorConfig(
+                        min=0, max=MEDIA_RETENTION_HOURS_MAX, step=1, mode=NumberSelectorMode.BOX, unit_of_measurement="h"
+                    ),
                 ),
                 vol.Required(CONF_MESSAGE, default=_options.get(CONF_MESSAGE, 10)): NumberSelector(
                     NumberSelectorConfig(

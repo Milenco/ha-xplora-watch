@@ -40,6 +40,7 @@ from .const import (
     CONF_HOME_SAFEZONE,
     CONF_MAPS,
     CONF_MAX_ACCURACY,
+    CONF_MEDIA_RETENTION_HOURS,
     CONF_MESSAGE,
     CONF_NOTIFY_CALL,
     CONF_NOTIFY_LOW_POWER,
@@ -85,6 +86,7 @@ class ConfKeys(StrEnum):
     AUTO_MARK_READ = CONF_AUTO_MARK_READ
     HISTORY_RETENTION_DAYS = CONF_HISTORY_RETENTION_DAYS
     MAX_ACCURACY = CONF_MAX_ACCURACY
+    MEDIA_RETENTION_HOURS = CONF_MEDIA_RETENTION_HOURS
     HOME_IS_SAFEZONE = CONF_HOME_SAFEZONE
     MAPS = CONF_MAPS
     MESSAGE = CONF_MESSAGE
@@ -146,6 +148,8 @@ CONF_SPECS: dict[ConfKeys, _ConfSpec[Any]] = {
     ConfKeys.MAPS: _ConfSpec(default=MAPS[0], converter=_Converters.to_str),
     # Fork: 0 = off; negative values are treated as off.
     ConfKeys.MAX_ACCURACY: _ConfSpec(default=0, converter=lambda v: max(0, int(v))),
+    # Fork: 0 = keep chat media forever (upstream behaviour).
+    ConfKeys.MEDIA_RETENTION_HOURS: _ConfSpec(default=0, converter=lambda v: max(0, int(v))),
     ConfKeys.MESSAGE: _ConfSpec(default=10, converter=_Converters.to_int),
     # Per-category notification toggles. SOS defaults ON (the one safety category a polling user
     # should get without discovering a setting); calls/power/low-battery/safe-zone default OFF (ADR 0016).
@@ -177,6 +181,7 @@ class ResolvedOptions:
     home_is_safezone: str
     maps: str
     max_accuracy: int
+    media_retention_hours: int
     message: int
     notify_call: bool
     notify_sos: bool

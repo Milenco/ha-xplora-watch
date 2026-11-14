@@ -121,7 +121,8 @@
           "scan_interval_functions": "Aktualisierungsintervall für Funktionen (Alarme, Stille Zeiten, Sicherheitszonen)",
           "watches": "Uhren",
           "account_alias": "Konto-Alias",
-          "max_accuracy": "Positionen ungenauer als (m, 0 = aus) ignorieren"
+          "max_accuracy": "Positionen ungenauer als (m, 0 = aus) ignorieren",
+          "media_retention_hours": "Chat-Medien aufbewahren (Stunden, 0 = immer)"
         },
         "data_description": {
           "history_retention_days": "Wie lange der optionale Standortverlauf-Sensor vergangene Positionen speichert. Home Assistant bewahrt weit mehr auf als das ~3-Tage-Fenster der Xplora®-App. Nur relevant, sobald der Standortverlauf-Sensor aktiviert ist.",
@@ -135,7 +136,8 @@
           "notify_low_power": "Löst ein Home-Assistant-Ereignis aus und schreibt eine Logbuchzeile, wenn die Uhr einen niedrigen Akkustand meldet. Standardmäßig deaktiviert. Wird nur ausgelöst, während das Abrufen aktiv ist.",
           "notify_safezone": "Löst ein Home-Assistant-Ereignis aus und schreibt eine Logbuchzeile, wenn die Uhr das Betreten oder Verlassen einer ihrer Sicherheitszonen meldet. Standardmäßig deaktiviert. Wird nur ausgelöst, während das Abrufen aktiv ist. Ereignis und Logbuchzeile speichern den gemeldeten Standort in der Recorder-Datenbank von Home Assistant.",
           "account_alias": "Benennt das Uhrengerät dieses Kontos beim nächsten Neuladen um (z. B. „Dana Watch (Mama)“). Vorhandene Entitäts-IDs behalten ihren ursprünglichen Namen, sodass darauf verweisende Automationen und Dashboards weiter funktionieren.",
-          "max_accuracy": "Funkzellen-Positionen (LBS) können um einen Kilometer oder mehr daneben liegen. Ungenauere Positionen behalten die vorherige Position am Tracker (Attribut ignored_fix). 0 behält jede Position."
+          "max_accuracy": "Funkzellen-Positionen (LBS) können um einen Kilometer oder mehr daneben liegen. Ungenauere Positionen behalten die vorherige Position am Tracker (Attribut ignored_fix). 0 behält jede Position.",
+          "media_retention_hours": "Sprachnachrichten, Fotos und Videos liegen unter config/www und sind ohne Anmeldung abrufbar, wenn man den Dateinamen kennt. Bei einem Wert über 0 werden ältere Dateien gelöscht und Medien älterer Nachrichten nicht erneut geladen."
         },
         "title": "weitere Einstellungen für HA Xplora® Watch"
       }

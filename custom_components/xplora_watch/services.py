@@ -14,6 +14,7 @@ some watches were skipped.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
@@ -70,9 +71,11 @@ from .const import (
 )
 from .coordinator import XploraDataUpdateCoordinator
 from .helper import (
+    chat_create_epoch,
     chat_media_cached,
     encoded_base64_string_to_file,
     encoded_base64_string_to_mp3_file,
+    purge_chat_media,
     time_str_to_minutes,
     weekdays_to_week_repeat,
 )
@@ -918,6 +921,9 @@ class XploraMessageSensorUpdateService(XploraService):
             resolved = resolve(coordinator._entry.options)
             limit: int = resolved.message
             show_remove_msg = resolved.remove_message
+            # Fork: chat media older than the retention is neither downloaded nor kept (0 = off).
+            retention = resolved.media_retention_hours
+            media_cutoff = time.time() - retention * 3600 if retention else None
             for watch in account.wuids:
                 res_chats = await account.call(
                     "Read messages",
@@ -934,6 +940,9 @@ class XploraMessageSensorUpdateService(XploraService):
                     for chat in res_chats.get("list") or []:
                         chat_type = chat.get("type")
                         msg_id = chat.get("msgId")
+                        created = chat_create_epoch(chat)
+                        if media_cutoff is not None and created is not None and created < media_cutoff:
+                            continue  # fork: too old -- don't fetch its media (again)
                         if chat_type == "VOICE":
                             await self._fetch_chat_voice(coordinator, watch, msg_id)
                         elif chat_type == "SHORT_VIDEO":
@@ -949,6 +958,12 @@ class XploraMessageSensorUpdateService(XploraService):
                     old_state.update({watch: new_data_msg})
                 if account.broken:
                     break
+            if retention:
+                # Fork: drop expired chat media; keep the watch pictures (www/image/<watch id>.jpeg).
+                keep = set(account.wuids) | set(coordinator._configured_wuids)
+                removed = await self._hass.async_add_executor_job(purge_chat_media, self._hass.config.path("www"), retention, keep)
+                if removed:
+                    account.log.debug("Removed %d expired chat media file(s)", removed)
             await coordinator.async_update_xplora_data(new_data=old_state)
 
         await self._fan_out(data, ATTR_SERVICE_READ_MSG, body)

@@ -6,7 +6,8 @@ import asyncio
 import base64
 import logging
 import os
-from typing import TYPE_CHECKING
+import time
+from typing import TYPE_CHECKING, Any
 
 import aiohttp
 from geopy import distance
@@ -214,6 +215,47 @@ def is_distance_in_radius(home_lat_lng: tuple[float, float], lat_lng: tuple[floa
     if radius >= int(distance.distance(home_lat_lng, lat_lng).m):
         return True
     return False
+
+
+# Fork (Milenco): where the read-message service stores chat media, relative to `www/`.
+CHAT_MEDIA_DIRS: tuple[str, ...] = ("voice", "image", "video", "video/thumb")
+
+
+def chat_create_epoch(chat: dict[str, Any]) -> float | None:
+    """A chat entry's `create` time in epoch seconds (accepts seconds or milliseconds), or None."""
+    try:
+        value = float(chat.get("create"))  # type: ignore[arg-type]
+    except TypeError, ValueError:
+        return None
+    return value / 1000 if value > 1e11 else value
+
+
+def purge_chat_media(base_dir: str, max_age_hours: int, keep_stems: set[str], now: float | None = None) -> int:
+    """Fork: delete chat media files older than `max_age_hours` under `base_dir` (the `www` folder).
+
+    Only the chat-media folders are touched, and a file whose name (without extension) is in
+    `keep_stems` is kept -- the watch's own picture lives in `www/image/<watch id>.jpeg`. Blocking
+    (file I/O): run it in the executor. Returns the number of deleted files.
+    """
+    if max_age_hours <= 0:
+        return 0
+    cutoff = (now if now is not None else time.time()) - max_age_hours * 3600
+    removed = 0
+    for sub in CHAT_MEDIA_DIRS:
+        folder = os.path.join(base_dir, sub)
+        if not os.path.isdir(folder):
+            continue
+        for name in os.listdir(folder):
+            path = os.path.join(folder, name)
+            if not os.path.isfile(path) or os.path.splitext(name)[0] in keep_stems:
+                continue
+            try:
+                if os.path.getmtime(path) < cutoff:
+                    os.remove(path)
+                    removed += 1
+            except OSError:
+                continue
+    return removed
 
 
 def chat_media_cached(hass: HomeAssistant, file_name: str, file_type: str, file_dir: str) -> bool:

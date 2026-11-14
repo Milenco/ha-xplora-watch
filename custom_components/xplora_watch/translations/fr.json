@@ -121,7 +121,8 @@
           "scan_interval_functions": "Intervalle de mise à jour des fonctions (alarmes, plages silencieuses, zones sûres)",
           "watches": "Montres",
           "account_alias": "Alias du compte",
-          "max_accuracy": "Ignorer les positions moins précises que (m, 0 = non)"
+          "max_accuracy": "Ignorer les positions moins précises que (m, 0 = non)",
+          "media_retention_hours": "Conserver les médias du chat (heures, 0 = toujours)"
         },
         "data_description": {
           "history_retention_days": "Durée de conservation des positions passées par le capteur d'historique de position (optionnel). Home Assistant en conserve bien plus que la fenêtre d'environ 3 jours de l'application Xplora®. N'a d'effet qu'une fois le capteur d'historique de position activé.",
@@ -135,7 +136,8 @@
           "notify_low_power": "Déclenche un événement Home Assistant et écrit une ligne de journal lorsque la montre signale une batterie faible. Désactivé par défaut. Ne se déclenche que lorsque l'interrogation est active.",
           "notify_safezone": "Déclenche un événement Home Assistant et écrit une ligne de journal lorsque la montre signale qu'elle entre dans l'une de ses zones de sécurité ou en sort. Désactivé par défaut. Ne se déclenche que lorsque l'interrogation est active. L'événement et la ligne de journal enregistrent la position signalée dans la base de données du recorder de Home Assistant.",
           "account_alias": "Renomme l'appareil montre de ce compte au prochain rechargement (par ex. « Dana Watch (Maman) »). Les identifiants d'entités existants conservent leur nom d'origine, afin que les automatisations et tableaux de bord qui les référencent continuent de fonctionner.",
-          "max_accuracy": "Les positions par antenne (LBS) peuvent être fausses d'un kilomètre ou plus. Les moins précises gardent la position précédente sur le tracker (attribut ignored_fix). 0 garde toutes les positions."
+          "max_accuracy": "Les positions par antenne (LBS) peuvent être fausses d'un kilomètre ou plus. Les moins précises gardent la position précédente sur le tracker (attribut ignored_fix). 0 garde toutes les positions.",
+          "media_retention_hours": "Les messages vocaux, photos et vidéos sont stockés dans config/www et accessibles sans connexion à qui connaît le nom du fichier. Avec une valeur supérieure à 0, les fichiers plus anciens sont supprimés et ne sont pas retéléchargés."
         },
         "title": "paramètres supplémentaires pour HA Xplora® Watch"
       }

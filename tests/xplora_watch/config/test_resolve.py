@@ -41,6 +41,7 @@ def test_resolve_empty_returns_defaults() -> None:
         home_is_safezone=STATE_OFF,
         maps=MAPS[0],
         max_accuracy=0,  # fork option, off by default
+        media_retention_hours=0,  # fork option, off by default
         message=10,
         notify_call=False,
         notify_sos=True,
