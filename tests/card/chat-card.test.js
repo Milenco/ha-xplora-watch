@@ -87,6 +87,29 @@ describe("incremental rendering", () => {
     expect(el.shadowRoot.querySelector('[data-key="m1"]')).toBe(firstNode);
     expect(el.shadowRoot.querySelector('[data-key="m2"]')).not.toBeNull();
   });
+
+  // Fork regression: a bubble whose media failed to load is rebuilt on the next render (to retry the
+  // media), but the old node was left in the DOM. It then trailed below the newest message and a
+  // new copy piled up on every render -- with media_retention_hours most voice messages are broken.
+  it("rebuilds a bubble with broken media in place instead of leaving the old one behind", () => {
+    const voice = chat("v1", { type: "VOICE", text: "voice", create: 1700000000000 });
+    const text = chat("t1", { text: "later", sender: "acct1", create: 1700000100000 });
+    const el = mountChat([voice, text]);
+
+    const audio = el.shadowRoot.querySelector('[data-key="v1"] .media-audio');
+    audio.dispatchEvent(new Event("error")); // media file missing -> wrap flagged .broken
+    expect(el.shadowRoot.querySelector('[data-key="v1"] .media-wrap.broken')).not.toBeNull();
+
+    const keys = () => bubbleRows(el).map((r) => r.getAttribute("data-key"));
+    const newest = chat("t2", { text: "newest", sender: "acct1", create: 1700000200000 });
+    el.hass = makeHass([voice, text, newest], { lastUpdated: "2026-06-27T10:05:00Z" });
+    expect(keys()).toEqual(["v1", "t1", "t2"]);
+
+    // The rebuilt bubble breaks again (file still missing); later renders must not pile up copies.
+    el.shadowRoot.querySelector('[data-key="v1"] .media-audio').dispatchEvent(new Event("error"));
+    el.hass = makeHass([voice, text, newest], { lastUpdated: "2026-06-27T10:10:00Z" });
+    expect(keys()).toEqual(["v1", "t1", "t2"]);
+  });
 });
 
 describe("refresh button", () => {

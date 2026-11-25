@@ -13,8 +13,9 @@ Branch: `milenco` (standaardbranch van de fork). `main` is ongewijzigd van upstr
 | Optie `max_accuracy` | Posities die minder nauwkeurig zijn dan dit aantal meters (zendmast/LBS) verplaatsen de tracker niet; de genegeerde positie staat in het attribuut `ignored_fix`. 0 = uit. |
 | Optie `media_retention_hours` | Spraak, foto's en video's uit de chat staan onder `config/www` (zonder inlog op te vragen als je de bestandsnaam kent). Met een waarde boven 0 verwijdert `read_message` oudere bestanden en downloadt het media van oudere berichten niet opnieuw; de chatkaart toont ze dan als niet beschikbaar. De foto van het horloge zelf blijft. 0 = altijd bewaren. |
 | Zonemeldingen uit de feed | Event `xplora_watch_safezone` bij ARRIVE/LEAVE_SAFE_ZONE (commit uit de branch bij upstream-issue #17), aangevuld met de zonenaam (`zone`, uit `safezone_name`), `zone_id`, `addr` en `rad` zoals een echte feedregel ze bevat. |
+| Chatkaart: geen dubbele berichten | Een bericht waarvan de media niet (meer) te laden is, wordt bij elke update opnieuw opgebouwd. Upstream bleef de oude versie daarbij staan, onder het nieuwste bericht, en kwam er bij elke update een kopie bij. Met `media_retention_hours` gold dat voor bijna alle spraakberichten. |
 
-Tests van de fork staan in `tests/xplora_watch/fork/`.
+Tests van de fork staan in `tests/xplora_watch/fork/`, die van de kaarten in `tests/card/` (`npm ci`, dan `npx vitest run`).
 
 ## Nieuwe release maken
 

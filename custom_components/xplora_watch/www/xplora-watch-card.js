@@ -3782,11 +3782,16 @@ class XploraWatchChatCard extends HTMLElement {
 
     // Index the bubbles already in the DOM by key, then walk the desired order: reuse a matching
     // node (moving it into place if needed) or create a new one. Leftovers are removed at the end.
-    // Bubbles whose media failed to load are skipped (left out of the reuse map) so they're rebuilt
-    // fresh -- this retries the media, recovering once a previously-missing file gets downloaded.
+    // Bubbles whose media failed to load are removed (and left out of the reuse map) so they're
+    // rebuilt fresh -- this retries the media, recovering once a previously-missing file gets
+    // downloaded. Removing them matters: a skipped-but-kept node would trail below the newest
+    // message and pile up another copy on every render.
     const existing = new Map();
     el.querySelectorAll(":scope > [data-key]").forEach((n) => {
-      if (n.querySelector(".media-wrap.broken")) return;
+      if (n.querySelector(".media-wrap.broken")) {
+        n.remove();
+        return;
+      }
       existing.set(n.getAttribute("data-key"), n);
     });
 
